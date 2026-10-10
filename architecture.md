@@ -1,7 +1,7 @@
 # ShopSmart AI — Architecture & System Design Overview
 
 > Derived from `PRD.md` v1.0.0 + `ShopSmartAI_Hackathon_Usecase.docx`.
-> Stack constraint: **React 19 + Vite | Java + Spring Boot 3 + Spring AI | PostgreSQL + PgVector**
+> Verified Stack: **Next.js 14 (Web) + Expo / React Native (App) | Node.js 22 + Express 4 | SQLite (WAL) + 128-dim Hybrid RAG | DeepSeek AI**
 > Scope: **Hackathon MVP with production-grade architecture. Real payments, real carriers, real WMS are OUT OF SCOPE (simulated).**
 
 ---
@@ -47,20 +47,20 @@ Hackathon metrics: (1) AI-assisted discovery success rate, (2) Grounded policy a
 Registration/login (JWT), catalog browse, category hierarchy, search/filter/sort/pagination, PDP, comparison (≤4), wishlist, cart, preferences, membership display, simulated checkout, order history/tracking, AI shopping assistant, RAG policy assistant.
 
 **MVP Must-Have — AI:**
-Constraint extraction/validation, catalog-grounded ranking, explainable responses, document ingestion/versioning, chunking/embeddings (PgVector), hybrid retrieval, grounded generation with citations/confidence, safe fallback, trace logging.
+Constraint extraction/validation, catalog-grounded ranking, explainable responses, document ingestion/versioning, chunking/128-dim embeddings, hybrid retrieval, grounded generation with citations/confidence, safe fallback, trace logging.
 
 **MVP Must-Have — Ops:**
 Admin catalog/inventory/orders/documents/tickets/audit/approvals, simulated order/shipment ops, human approval for sensitive simulated ops.
 
 **Stretch:** coupons, multi-warehouse, personalized ranking/reorder, semantic catalog search, multi-channel consistency, recovery workflows, analytics, a11y/i18n.
 
-**Explicitly Out-of-Scope:** real payment/money movement, real carrier APIs, real warehouse automation, seller onboarding, fraud detection, logistics optimization, multi-currency/tax, native mobile (responsive web is enough).
+**Explicitly Out-of-Scope:** real payment/money movement, real carrier APIs, real warehouse automation, seller onboarding, fraud detection, logistics optimization, multi-currency/tax.
 
 **Post-hackathon (don't block):** real payments/carriers/WMS, multi-region, Kafka streaming, fraud, seller flows, SOC2/PCI/GDPR hardening, LLM eval pipelines, multi-language, real notifications.
 
 ### 1.5 Key Assumptions (A1–A12)
 
-JWT auth; tiers `BASIC/PRIME/PREMIUM`; seeded structured products; central inventory; warehouse via internal/simulated APIs; trusted versioned documents (`version, effectiveDate, category, region`); simulated payment/shipment; configurable/mockable models; English-only, single-region MVP.
+JWT auth; tiers `BASIC/PRIME/PREMIUM`; seeded structured products (13 per category, 52 total); central inventory; warehouse via internal/simulated APIs; trusted versioned documents (`version, effectiveDate, category, region`); simulated payment/shipment; configurable DeepSeek model (`deepseek-v4.1-flash:free`); English-only, single-region MVP.
 
 ### 1.6 Personas & Critical Journeys
 
@@ -76,13 +76,14 @@ Three golden journeys (must demo):
 
 | Layer | Choice |
 |---|---|
-| Frontend | React 19 + Vite, responsive accessible components, React Query / Zustand |
-| Backend | Java 21+, Spring Boot 3, Spring AI, Spring Data JPA, Jakarta Validation |
-| DB | PostgreSQL 15+ + PgVector (single source of truth: relational + vectors + audit + outbox) |
-| Auth | JWT (`sub, roles, iss, exp`, 15–30 min expiry) + RBAC server-side |
-| Docs | OpenAPI 3, Flyway/Liquibase, Docker Compose |
-| Tests | JUnit, Testcontainers, Playwright/Cypress optional, golden RAG datasets |
-| AI | Configurable provider (`mock\|openai\|ollama\|other`), deterministic mock mode for demo |
+| Web Frontend | Next.js 14 + React 18 + TypeScript (storefront + admin console) |
+| Mobile Frontend | Expo / React Native + TypeScript (Home, PDP, Cart, Orders, Assistant, Admin) |
+| Backend | Node.js 22+ (LTS) + Express 4.19 modular monolith |
+| DB | SQLite 3 (`shopsmart.db`, WAL Mode, foreign keys ON via Node 22 `node:sqlite`) |
+| Vector & RAG | 128-dimensional L2-normalized vector embeddings + cosine/keyword hybrid retrieval |
+| LLM Provider | DeepSeek (`deepseek-v4.1-flash:free` via OpenAI-compatible endpoint) |
+| Auth | JWT (`sub, role, membership, iss, exp`, 30 min expiry) + RBAC server-side |
+| Testing | Node.js native test runner (`node:test`, `node:assert/strict`) — 32 tests passing |
 
 Roles: `CUSTOMER, SUPPORT_AGENT, OPS_MANAGER, CATALOG_MANAGER, KNOWLEDGE_ADMIN, ADMIN, AGENT_RUNTIME`.
 
@@ -94,60 +95,58 @@ Roles: `CUSTOMER, SUPPORT_AGENT, OPS_MANAGER, CATALOG_MANAGER, KNOWLEDGE_ADMIN, 
 
 **Modular monolith** (PRD §4.2–4.3).
 
-Why: easier hackathon run/test, fewer distributed failures, clean module boundaries, decomposable later. Async via Spring events + `outbox_events` table (Kafka-ready).
+Why: instant local run, zero container overhead, clean domain boundaries, unified SQLite persistence. Async via in-process events + `outbox_events` table (Kafka-ready).
 
 Key decisions:
 
 | Decision | Rationale |
 |---|---|
 | Modular monolith | Coherence + low ops overhead |
-| Postgres as SSOT | Integrity + vector search in one DB |
+| SQLite as SSOT | Zero external DB dependency, instant cold start, ACID transactions |
 | AI must reference real records | Anti-hallucination |
 | Tool-based agents only | Safe, explicit, auditable |
 | Server-side validation everywhere | Never trust model/client output |
 | Simulated externals behind interfaces | Swappable for real systems |
-| Mock model adapters | Deterministic live demo |
-| Outbox pattern | Future-proof async |
+| Deterministic fallback | Live demo resilience even during model network issues |
+| Outbox pattern | Future-proof async event distribution |
 
 ### 2.2 High-Level Architecture
 
 ```mermaid
 flowchart TB
-    subgraph FE["FRONTEND — React 19 + Vite"]
-        CS[Customer Store<br/>Search / PDP / Cart / Orders]
-        AS[Assistant UI<br/>Shopping + Knowledge Chat]
-        SU[Support UI]
-        AD[Admin UI<br/>Catalog / Inventory / Docs / Agent Ops]
+    subgraph FE["FRONTEND LAYER"]
+        WEB["Next.js 14 Web Storefront<br/>Browse / PDP / Cart / Checkout / Admin"]
+        APP["Expo / React Native App<br/>Home / PDP / Cart / Orders / Assistant / Ops"]
     end
 
-    subgraph BE["BACKEND — Spring Boot 3 Modular Monolith"]
+    subgraph BE["BACKEND — Node.js 22 + Express 4 Modular Monolith"]
         subgraph CORE["Domain Modules"]
             ID[identity<br/>auth / profile / membership]
             CAT[catalog + inventory + search]
-            ORD[cart + order + shipment<br/>+ fulfillment]
+            ORD[cart + order + shipment<br/>+ simulated fulfillment]
             SUP[support + tickets]
         end
-        subgraph AI["AI Layer — Spring AI"]
+        subgraph AI["AI Layer — DeepSeek + Local RAG"]
             SHOP[Shopping Assistant<br/>intent → constraints → rank → explain]
-            RAG[Knowledge RAG<br/>ingest → retrieve → ground → cite]
-            AGENT[Agent Orchestrator<br/>route → plan → tools → audit]
+            RAG[Knowledge RAG<br/>chunk → 128-dim embed → cosine/kw → cite]
+            AGENT[Agent Orchestrator<br/>route → plan → 11 tools → audit]
         end
         subgraph CROSS["Cross-Cutting"]
-            AUTHZ[AuthZ / Validation / Idempotency<br/>Rate Limit / Audit / Observability]
+            AUTHZ[RBAC Auth / Zod Validation / Idempotency<br/>Rate Limiting / Audit / Outbox]
         end
         CORE --> AI
         CORE --- CROSS
         AI --- CROSS
     end
 
-    subgraph DATA["DATA — PostgreSQL + PgVector"]
-        REL[(Relational<br/>users / catalog / orders / tickets)]
-        VEC[(Vectors<br/>knowledge_chunks.embedding)]
-        OPS[(Audit / Outbox / Idempotency<br/>agent_runs / audit_logs)]
+    subgraph DATA["PERSISTENCE — SQLite 3 (WAL Mode)"]
+        REL[(Relational Tables<br/>users / products / orders / shipments)]
+        VEC[(Vector Store<br/>knowledge_chunks.embedding JSON)]
+        OPS[(Audit & Outbox<br/>agent_runs / audit_logs / outbox_events)]
     end
 
-    FE -- HTTPS / JSON<br/>Bearer JWT --> BE
-    BE -- JPA / JDBC / pgvector --> DATA
+    FE -- HTTPS / JSON (/api/v1)<br/>Bearer JWT --> BE
+    BE -- node:sqlite DatabaseSync --> DATA
 ```
 
 ### 2.3 Module Boundaries
@@ -330,15 +329,17 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    DEV["Dev Machine"] --> DC["Docker Compose<br/>postgres:15 + pgvector"]
-    DEV --> BE_RUN["Backend<br/>./mvnw spring-boot:run :8080"]
-    DEV --> FE_RUN["Frontend<br/>npm run dev :5173"]
-    BE_RUN --> DC
-    FE_RUN -->|"VITE_API_BASE_URL<br/>http://localhost:8080/api/v1"| BE_RUN
-    ENV["env: SPRING_DATASOURCE_URL<br/>AI_PROVIDER=mock &#124; openai &#124; ollama<br/>EMBEDDING_PROVIDER<br/>JWT_SECRET"] -.-> BE_RUN
+    DEV["Developer Machine"] --> DB_FILE["SQLite Database<br/>db/shopsmart.db (WAL Mode)"]
+    DEV --> BE_RUN["Backend API (:4000)<br/>node src/index.js"]
+    DEV --> WEB_RUN["Web Storefront (:3000)<br/>npm run dev (Next.js 14)"]
+    DEV --> APP_RUN["Mobile App (:8081)<br/>npx expo start (React Native)"]
+    BE_RUN --> DB_FILE
+    WEB_RUN -->|"NEXT_PUBLIC_API_BASE_URL<br/>http://localhost:4000/api/v1"| BE_RUN
+    APP_RUN -->|"http://localhost:4000/api/v1"| BE_RUN
+    ENV["backend/.env: PORT=4000<br/>DB_PATH=../db/shopsmart.db<br/>JWT_SECRET<br/>TOKENHARBOR_API_KEY / DEEPSEEK_API_KEY<br/>DEEPSEEK_MODEL=deepseek-v4.1-flash:free"] -.-> BE_RUN
 ```
 
-Seed: 3 categories, 20+ products (5 laptops/5 phones/5 appliances/5 accessories), 3 users + support/admin, 3+ policy docs, 2 orders, 1 shipment. `AI_PROVIDER=mock` → deterministic vectors/extraction for demo.
+Seed: 4 categories, 52 products (13 per category), 10 users across customer & staff roles, 5 active policy docs (24 chunks), 3 sample orders, 1 shipment. Live DeepSeek model (`deepseek-v4.1-flash:free`) powers generation; deterministic rule extraction + DB ranking acts as fallback.
 
 ---
 
@@ -371,12 +372,12 @@ PRD §6.3 pipeline; deterministic weighted ranking (budget 30%, attribute/use-ca
 
 ```mermaid
 flowchart TD
-    Q[User Query<br/>e.g. laptop under $1000 Java+AI] --> SAN[Sanitize + Injection Guard]
+    Q[User Query<br/>e.g. laptop under 1000 dollars Java+AI] --> SAN[Sanitize + Injection Guard]
     SAN --> INT[Intent Classification]
     INT --> EXT[Constraint Extraction<br/>JSON: intent/category/budget/useCases/attrs]
     EXT --> VAL[Constraint Validation<br/>bad budget→400 / conflict→clarify]
     VAL --> QB[Catalog Query Builder<br/>validated filters only]
-    QB --> RET[Product Retrieval<br/>PostgreSQL only, no model objects]
+    QB --> RET[Product Retrieval<br/>SQLite only, no model objects]
     RET --> RANK[Ranking / Scoring<br/>deterministic weights]
     RANK --> EXP[Explanation Builder<br/>facts only: attrs/price/rating/stock]
     EXP --> RESP_VAL[Response Validation<br/>IDs+prices+stock exist in DB?]
@@ -396,17 +397,17 @@ flowchart TD
         UP[Upload PDF/MD/JSON<br/>+ metadata] --> META[Metadata Validation<br/>title/category/version/effectiveDate/region]
         META --> PARSE[Parse<br/>PDF extract / MD normalize / JSON flatten]
         PARSE --> NORM[Normalize<br/>keep headings + refs]
-        NORM --> CHUNK[Chunk 600-900 tok<br/>overlap 80-120, section-aware]
-        CHUNK --> EMB[Embed]
-        EMB --> STORE[(PgVector store<br/>chunk + embedding + version/region)]
+        NORM --> CHUNK[Chunk section-aware<br/>target 2500 char, 200 overlap]
+        CHUNK --> EMB[128-dim Normalized Embedding]
+        EMB --> STORE[(SQLite Knowledge Store<br/>knowledge_chunks.embedding JSON)]
         STORE --> PUB[Activate → SUPERSEDE old]
     end
     subgraph ANSWER["Answer (online)"]
-        Q2[User Q<br/>Can I return opened laptop?] --> HYB[Hybrid Retrieval<br/>vector + keyword + metadata filter<br/>ACTIVE + latest + region/category<br/>topK=5 + threshold]
+        Q2[User Q<br/>Can I return opened laptop?] --> HYB[Hybrid Retrieval<br/>128-dim cosine + keyword overlap<br/>ACTIVE + latest + region/category<br/>topK=5 + threshold >= 0.22]
         HYB --> EVID{Evidence?}
-        EVID -- yes --> GEN[Grounded Generation<br/>only from chunks, cite IDs<br/>conflict→latest date + LOW]
-        EVID -- no --> FALL[Safe Fallback<br/>confidence NONE + NO_EVIDENCE log]
-        GEN --> CONF[Confidence HIGH/MED/LOW<br/>+ doc/section/version/chunkId]
+        EVID -- yes --> GEN[Grounded Generation<br/>DeepSeek LLM answering strictly from chunks<br/>cite doc/section/version]
+        EVID -- no --> FALL[Safe Fallback<br/>confidence NONE + NO_EVIDENCE log<br/>I don't have enough approved info...]
+        GEN --> CONF[Confidence HIGH/MED/LOW<br/>+ sources citation]
     end
     PUB -.-> HYB
 ```
@@ -565,16 +566,41 @@ Support console reuses same RAG service + order context + recommended actions + 
 
 ---
 
-## Appendix — File / Repo Map (Proposed)
+## Appendix — File / Repo Map (Actual Implementation)
 
 ```text
 shopsmart-ai/
-  backend/  src/main/java/... (identity|catalog|inventory|search|cart|order|shipment|support|knowledge|assistant|agent|admin|audit)
-            src/main/resources/ (migrations, prompts, seeds)
-  frontend/ src/ (store|assistant|support|admin|api client)
-  docker-compose.yml   seed/   docs/ (this file + OpenAPI)
+  backend/           # Node.js 22 + Express 4.19 modular monolith (:4000)
+    package.json
+    src/
+      index.js       # App entry & route mounts
+      config.js      # Environment & LLM settings
+      db.js          # SQLite connection (WAL mode)
+      middleware/    # auth.js, errors.js, idempotency.js, rateLimit.js
+      utils/         # llm.js, embeddings.js, ranking.js, retrieval.js, prompts.js, ids.js, sanitize.js
+      modules/       # identity, catalog, wishlist, cart, order, support, knowledge, assistant, agent, admin, audit
+      seed/seed.js   # Idempotent database seeder (52 products, 10 users, 5 docs)
+    tests/           # Native test runner suites (node:test) - 32 tests
+  db/                # SQLite persistent store
+    schema.sql       # Full DDL schema
+    seed-data.json   # 52 catalog products + user personas
+    shopsmart.db     # SQLite WAL database
+    knowledge_docs/  # Versioned enterprise policy documents (.md)
+  frontend-web/      # Next.js 14 + React 18 storefront & admin (:3000)
+    app/             # App router pages (browse, PDP, cart, checkout, orders, assistant, admin)
+    components/      # ProductCard, Navbar, reusable UI
+    lib/             # api.ts, auth.tsx
+  frontend-app/      # Expo / React Native mobile app (:8081)
+    App.tsx          # Root shell with bottom tab bar & modals
+    src/screens/     # HomeScreen, AssistantScreen, OrdersScreen, OpsAdminScreen, CompareWishlistScreen
+    src/components/  # GradientHeader, BottomTabBar, PersonaModal
+    src/context/     # AuthContext, CartContext
+    src/api/         # catalog, cart, orders, assistant, support, admin clients
+  explanation.md     # Comprehensive system audit and production readiness document
+  PRD.md             # Production-minded product requirements document
+  architecture.md    # Architecture and system design overview
 ```
 
-**Definition of done:** working FE+BE, seeded DB, this diagram doc, setup instructions, live demo of both assistants + tracking + 1 safe agent action, proper schema/validation/errors, clean structure, tests/plan, simulated-vs-real statement.
+**Definition of done:** working FE+BE+Mobile, seeded DB with 52 records, comprehensive documentation, live demo of both assistants + tracking + safe agent actions, RFC7807 problem errors, clean structure, 32 passing automated tests, clear simulated-vs-real boundaries.
 
-*Source: PRD §§1–24 + hackathon use-case doc. Simulated = `PAID_SIMULATED`, `SIM-TRACK-*`, mock carrier/WMS; production swap behind interfaces.*
+*Source: PRD §§1–24 + hackathon use-case doc. Simulated = `PAID_SIMULATED`, `SIM-TRACK-*`, mock carrier progression; production swap behind interfaces.*

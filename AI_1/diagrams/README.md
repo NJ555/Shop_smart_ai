@@ -1,17 +1,17 @@
 # ShopSmart AI — Complete System Design Diagram Suite
 
 > **Production-Minded System Architecture, Workflows, Data Models, AI Pipelines, Security Boundaries, and Failure Recovery Playbooks**  
-> **Document Reference:** [PRD.md](../../PRD.md) (v1.0.0) | **Scope:** Hackathon MVP (Modular Monolith with In-Process Outbox & Simulated Boundaries)
+> **Document Reference:** [PRD.md](../../PRD.md) (v1.0.0) | **Scope:** MVP (Node.js Modular Monolith with In-Process Outbox & Simulated Boundaries)
 
 ---
 
 ## 1. Executive Architecture Summary
 
-**ShopSmart AI** is an autonomous e-commerce assistant platform designed with a **modular monolith** backend in **Java 21 + Spring Boot 3 + Spring AI**, a reactive storefront in **React 19 + Vite**, and a unified persistence engine in **PostgreSQL 15+ with PgVector**.
+**ShopSmart AI** is an autonomous e-commerce assistant platform designed with a **modular monolith** backend in **Node.js 22 + Express 4.19**, responsive storefronts in **Next.js 14** (web) and **React Native / Expo** (mobile), persistence in **SQLite 3 (WAL Mode)** with in-process vector similarity search, and cloud **DeepSeek AI** integration (`deepseek-v4.1-flash:free`).
 
 ### Core Engineering Invariants
-1. **Catalog & Grounding Invariant:** AI recommendations and policy answers are strictly grounded in genuine PostgreSQL catalog and PgVector chunk records. Zero invented products, prices, specifications, or policies.
-2. **Atomic Inventory & Concurrency:** Concurrency control utilizes pessimistic database locking (`SELECT ... FOR UPDATE`) during checkout transactions to prevent stock overselling.
+1. **Catalog & Grounding Invariant:** AI recommendations and policy answers are strictly grounded in genuine SQLite catalog records and 128-dimensional L2-normalized vector chunks. Zero invented products, prices, specifications, or policies.
+2. **Atomic Inventory & Concurrency:** Concurrency control utilizes atomic database transaction boundaries and stock checks (`available_quantity >= requested_quantity`) during checkout transactions to prevent stock overselling.
 3. **Controlled Agent Boundaries:** Operational AI agents execute actions exclusively through strongly typed domain tools with strict schema validation, role-based allowlists, idempotency keys, and human-in-the-loop approval gates.
 4. **Scope Isolation:** Real payment processing, carrier integrations, and physical warehouses remain out of hackathon scope and are modeled as clean simulated boundaries (`PAID_SIMULATED`, simulated tracking numbers `SIM-TRACK-xxx`).
 
@@ -28,7 +28,7 @@ All diagrams are consolidated in **one single folder in exact numerical order** 
 | **03** | **MVP vs. Post-Hackathon Evolution** | [03_mvp_vs_evolution.svg](03_mvp_vs_evolution.svg) | §2.1 – §2.4, §4.2, §23 | **MVP vs FUTURE** |
 | **04** | **Customer End-to-End Experience Journey** | [04_customer_journey.svg](04_customer_journey.svg) | §3.1 – §3.3, §5.1 – §5.9 | **MVP** |
 | **05** | **Atomic Checkout & Stock Reservation Sequence** | [05_checkout_sequence.svg](05_checkout_sequence.svg) | §5.8, §5.9, §11.6, §14.1, §15.2 | **MVP** |
-| **06** | **Async Events & Transactional Outbox Pattern** | [06_async_events_outbox.svg](06_async_events_outbox.svg) | §4.5, §10.2, §12.1 – §12.3, §23.3 | **MVP (KAFKA-READY)** |
+| **06** | **Async Events & Transactional Outbox Pattern** | [06_async_events_outbox.svg](06_async_events_outbox.svg) | §4.5, §10.2, §12.1 – §12.3, §23.3 | **MVP (EVENT-READY)** |
 | **07** | **10-Stage AI Shopping Assistant Pipeline** | [07_shopping_assistant_pipeline.svg](07_shopping_assistant_pipeline.svg) | §6.1 – §6.11, §14.6, App A | **MVP (GROUNDED)** |
 | **08** | **RAG Knowledge Ingestion & Hybrid Retrieval** | [08_rag_knowledge_pipeline.svg](08_rag_knowledge_pipeline.svg) | §7.1 – §7.16, §13.5, App B | **MVP (GROUNDED RAG)** |
 | **09** | **Agentic Operations Architecture & Controlled Tools** | [09_agentic_operations.svg](09_agentic_operations.svg) | §8.1 – §8.15, §11.11, App C | **MVP (CONTROLLED)** |
@@ -49,9 +49,9 @@ The workspace has been organized so that all SVG images sit together in **one fo
 c:\Shop_smart_ai\
 ├── PRD.md                                           # Master Product Requirements Document
 ├── architecture.md                                  # System architecture summary & design notes
+├── explanation.md                                   # Comprehensive codebase audit & reference
 │
 └── AI_1/
-    ├── PRD.md
     └── diagrams/                                    # All 15 SVGs in one folder in right order
         ├── README.md                                # Diagram suite catalog & architectural descriptions
         ├── 01_system_overview.svg
@@ -70,9 +70,6 @@ c:\Shop_smart_ai\
         ├── 14_failure_modes_and_recovery.svg
         ├── 15_observability_audit_eval.svg
         └── svg/                                     # Dedicated mirrored SVG folder
-            ├── 01_system_overview.svg
-            ├── 02_deployment_infrastructure.svg
-            └── ... (15 SVG files)
 ```
 
 ---
@@ -83,28 +80,29 @@ c:\Shop_smart_ai\
 - **File:** [`01_system_overview.svg`](01_system_overview.svg)
 - **Purpose:** Illustrates the high-level system topology, module decomposition, and communication interfaces.
 - **Key Modules:**
-  - *Frontend:* React 19 + Vite storefront, assistant chat drawer, support workspace, and admin console.
+  - *Frontend:* Next.js 14 web storefront & React Native (Expo) mobile client.
   - *Backend Modules:* `identity`, `catalog`, `search`, `wishlist`, `cart`, `order`, `shipment`, `support`, `admin`, `audit`, and `outbox`.
-  - *Spring AI Subsystem:* Shopping Assistant Orchestrator, Knowledge RAG Engine, Agentic Tool Runtime.
-  - *Persistence:* Single PostgreSQL 15+ instance housing relational tables and PgVector vector embeddings.
-  - *Boundaries:* Explicit simulated logistics and payment adapters behind clean Java interfaces.
+  - *AI Subsystem:* Shopping Assistant Orchestrator, Knowledge RAG Engine (128-dim cosine + keyword overlap), Agentic Tool Runtime, and DeepSeek LLM (`deepseek-v4.1-flash:free`).
+  - *Persistence:* SQLite 3 database with WAL mode housing relational tables and serialized JSON vector embeddings.
+  - *Boundaries:* Explicit simulated logistics and payment adapters behind clean domain interfaces.
 
 ### 02. Deployment & Local Infrastructure
 - **File:** [`02_deployment_infrastructure.svg`](02_deployment_infrastructure.svg)
-- **Purpose:** Specifies container port bindings, internal bridge networking (`shopsmart-network`), volume mounts, and seed scripts.
+- **Purpose:** Specifies local development port bindings, runtime configuration, and seed scripts.
 - **Components:**
-  - `frontend`: Node 20-Alpine / Vite 6 dev server on host port `5173`.
-  - `backend`: Eclipse Temurin JDK 21 Spring Boot app container on host port `8080`.
-  - `db`: `pgvector/pgvector:pg15` container on host port `5432` with named volume `shopsmart_pgdata`.
-  - `seed`: Automatic database initialization via `01_init_schema.sql` and `02_seed_data.sql`.
-  - `AI_PROVIDER`: Configurable between deterministic mock mode (`mock`), local Ollama (`ollama`), or cloud OpenAI (`openai`).
+  - `frontend-web`: Next.js 14 server on port `3000`.
+  - `frontend-app`: React Native Expo dev client on port `8081`.
+  - `backend`: Node.js 22 / Express 4.19 API server on port `4000`.
+  - `db`: Local SQLite 3 file (`db/shopsmart.db`) in WAL mode with Foreign Key enforcement.
+  - `seed`: Automatic database initialization via `backend/src/seed/seed.js` loading `db/schema.sql`, `db/seed-data.json`, and `db/knowledge_docs/`.
+  - `AI_PROVIDER`: DeepSeek (`deepseek-v4.1-flash:free` via TokenHarbor / OpenAI-compatible endpoint).
 
 ### 03. MVP vs. Post-Hackathon Evolution
 - **File:** [`03_mvp_vs_evolution.svg`](03_mvp_vs_evolution.svg)
 - **Purpose:** Clarifies what is implemented for the hackathon MVP versus how the architecture evolves in production.
 - **Contrast Matrix:**
-  - *MVP:* Single Spring Boot monolith, in-process Spring events, transactional outbox table, single-region PostgreSQL, simulated payment/carrier events.
-  - *Post-Hackathon:* Decomposed microservices on Kubernetes, distributed Apache Kafka event backbone, real Stripe/Adyen payment gateways with 3DS webhooks, real FedEx/UPS APIs, multi-region database replication.
+  - *MVP:* Node.js/Express modular monolith, in-process outbox event dispatcher, transactional outbox table, local SQLite 3 in WAL mode, simulated payment/carrier events.
+  - *Post-Hackathon:* Decomposed microservices on Kubernetes, distributed Apache Kafka event backbone, real Stripe/Adyen payment gateways with 3DS webhooks, real FedEx/UPS APIs, multi-region PostgreSQL with pgvector replication.
 
 ### 04. Customer End-to-End Journey
 - **File:** [`04_customer_journey.svg`](04_customer_journey.svg)
@@ -115,7 +113,7 @@ c:\Shop_smart_ai\
   3. *AI Shopping Consultation:* Natural-language query, constraint extraction, catalog-grounded suggestions with reasons.
   4. *Evaluation:* PDP galleries, 4-way side-by-side spec comparison, persistent wishlist.
   5. *Cart Assembly:* Stock cap validation, real-time price rechecks, line item management.
-  6. *Atomic Checkout:* Server-recalculated totals, pessimistic inventory locks, simulated payment, unique order ID (`ORD-xxx`).
+  6. *Atomic Checkout:* Server-recalculated totals, inventory reservation, simulated payment, unique order ID (`ORD-xxx`).
   7. *Tracking & Support:* Shipment timeline (`LABEL_CREATED` -> `IN_TRANSIT` -> `DELIVERED`), pre-shipment cancellation, and RAG policy help.
 
 ### 05. Atomic Checkout & Stock Reservation Sequence
@@ -124,15 +122,15 @@ c:\Shop_smart_ai\
 - **Sequence Highlights:**
   - *Idempotency Check:* Checks `idempotency_keys` table; replayed requests immediately return cached order response without double billing.
   - *Price Revalidation:* Server recalculates subtotals; rejects stale or manipulated client-side prices.
-  - *Pessimistic Concurrency:* Executes `SELECT available_quantity FROM inventory_levels FOR UPDATE`. If stock is insufficient, triggers rollback and returns `409 Conflict`.
-  - *Atomic Commit:* Simultaneously inserts `orders`, `order_items` snapshots, updates `carts` to `CHECKED_OUT`, and inserts an `order.created` record into `outbox_events`.
+  - *Stock Verification:* Executes transactional check on available inventory. If stock is insufficient, triggers rollback and returns `409 Conflict`.
+  - *Atomic Commit:* Simultaneously inserts `orders`, `order_items` snapshots, updates `carts` to `CHECKED_OUT`, decrements inventory, and inserts an `order.created` record into `outbox_events`.
 
 ### 06. Async Events & Transactional Outbox Pattern
 - **File:** [`06_async_events_outbox.svg`](06_async_events_outbox.svg)
 - **Purpose:** Demonstrates how internal asynchronous events are processed reliably without dual-write risks.
 - **Flow:**
   - Domain operations insert both domain entity and `outbox_events` row (`status = 'PENDING'`) in a single commit.
-  - Scheduled poller queries pending outbox records and publishes to Spring `ApplicationEventPublisher`.
+  - In-process poller queries pending outbox records and publishes to domain event handlers.
   - Dispatches to decoupled listeners: `ShipmentSimulator` (`order.created`), `InventoryReconciliation` (`order.cancelled`), `KnowledgeReIndexer` (`knowledge.document_published`), and `AuditStreamHandler` (`agent.action_completed`).
 
 ### 07. 10-Stage AI Shopping Assistant Pipeline
@@ -144,26 +142,26 @@ c:\Shop_smart_ai\
   3. *Intent Classification:* Differentiates shopping intent from policy queries or chit-chat.
   4. *Constraint Extraction:* Structured JSON extraction (category, budget, RAM, storage, CPU).
   5. *Constraint Validation:* Validates against active catalog taxonomy; triggers clarifying questions on ambiguity.
-  6. *Catalog Query Builder:* Builds dynamic PostgreSQL query filtering real products with price <= budget.
+  6. *Catalog Query Builder:* Builds dynamic SQLite query filtering real products with price <= budget.
   7. *Database Product Retrieval:* Fetches real records only. Zero LLM product invention.
   8. *Deterministic Weighted Ranking:* 100% hard match, 30% budget fit, 30% spec fit, 20% rating, 10% availability, 10% user preferences.
   9. *Factual Explanation Builder:* Formulates reasons using only database attributes; bans promotional superlatives.
-  10. *Response Delivery & Trace:* Jackson schema validation, trace ID attachment, UI product cards returned.
+  10. *Response Delivery & Trace:* Strongly typed JSON schema validation, trace ID attachment, UI product cards returned.
 
 ### 08. RAG Knowledge Ingestion & Hybrid Retrieval
 - **File:** [`08_rag_knowledge_pipeline.svg`](08_rag_knowledge_pipeline.svg)
 - **Purpose:** Architecture of the version-aware enterprise policy assistant.
 - **Two Pipeline Streams:**
-  - *Stream 1 (Ingestion):* Uploads PDF/MD/JSON -> Parses headings -> Chunks text (600-900 tokens, 80-120 overlap) -> Generates dense vector embeddings via Spring AI -> Stores in PgVector `knowledge_chunks` with HNSW index -> Admin activates document (`DRAFT` -> `ACTIVE`; marks old version `SUPERSEDED`).
-  - *Stream 2 (Retrieval):* User/Support query -> Hybrid cosine similarity search + keyword matching -> Mandatory metadata filter (`status = 'ACTIVE'`, latest `effectiveDate`, `region`) -> Similarity threshold check (cosine >= 0.72; if below, returns safe fallback with `confidence: NONE`) -> Contradiction resolver (prefers latest date; flags `confidence: LOW`) -> Grounded answer with citation packaging (document name, section, version, chunk ID).
+  - *Stream 1 (Ingestion):* Markdown/Policy docs -> Parses headings -> Chunks text (200-400 words) -> Generates 128-dim L2-normalized vectors via hashed TF pipeline -> Stores in SQLite `knowledge_chunks` with JSON serialization -> Admin activates document (`DRAFT` -> `ACTIVE`; marks old version `SUPERSEDED`).
+  - *Stream 2 (Retrieval):* User/Support query -> Hybrid cosine similarity search + keyword overlap with stop-word suppression -> Mandatory metadata filter (`status = 'ACTIVE'`, latest `effectiveDate`, `region`) -> Similarity threshold check (`score >= 0.22`; if below, returns safe fallback with `confidence: NONE`) -> Grounded answer with citation packaging (document title, section, version, chunk ID).
 
 ### 09. Agentic Operations Architecture & Tools
 - **File:** [`09_agentic_operations.svg`](09_agentic_operations.svg)
 - **Purpose:** Details how operational AI agents execute simulated actions safely.
 - **Key Modules:**
-  - *Orchestrator Agent:* Goal decomposition, user role boundary verification, sub-agent dispatch.
-  - *Domain Agents:* Order Support Agent, Shipment Tracking Agent, Inventory Agent, Knowledge Agent, Fulfillment Exception Agent, Escalation Agent.
-  - *Tool Execution Layer:* Strict tool allowlists per role, JSON schema validation, timeout/retry enforcement (reads: 2s/2 retries, writes: 5s/1 retry).
+  - *Orchestrator Agent:* Goal decomposition, user role boundary verification, tool dispatch.
+  - *Domain Agents:* Order Support Agent, Shipment Tracking Agent, Inventory Agent, Knowledge Agent, Escalation Agent.
+  - *Tool Execution Layer:* Strict tool allowlists per role, JSON schema validation, timeout/retry enforcement.
   - *Human-in-the-Loop Approval Gate:* Actions classified as sensitive (simulated refunds > $100, manual inventory adjustments, policy publishing) enter `PENDING_APPROVAL` status and require Admin Console sign-off.
   - *Anti-Falsehood Guard:* Agent cannot claim purchase or cancellation success unless underlying domain service confirms execution.
 
@@ -176,7 +174,7 @@ c:\Shop_smart_ai\
   - *Commerce:* `wishlists`, `wishlist_items`, `carts`, `cart_items`
   - *Orders & Logistics:* `orders`, `order_items` (with frozen price/attribute snapshots), `shipments`, `shipment_events`, `refunds`
   - *Support:* `support_tickets`, `support_messages`
-  - *Knowledge Vector:* `knowledge_documents`, `knowledge_chunks` (with `VECTOR` column and HNSW index)
+  - *Knowledge Vector:* `knowledge_documents`, `knowledge_chunks` (with serialized JSON `embedding` column)
   - *AI & Operational State:* `assistant_conversations`, `assistant_messages`, `agent_runs`, `agent_tool_calls`, `audit_logs`, `idempotency_keys`, `outbox_events`
 
 ### 11. Unified Lifecycle State Machines Suite
@@ -193,18 +191,18 @@ c:\Shop_smart_ai\
 - **File:** [`12_security_rbac_trust_boundaries.svg`](12_security_rbac_trust_boundaries.svg)
 - **Purpose:** Defines network boundaries, perimeter filters, tenant data isolation, and the role privilege hierarchy.
 - **Security Zones:**
-  - *Zone 1 (Perimeter):* CORS origin lock, rate limiting (auth: 5/min, AI: 20/min, orders: 10/min), RFC 7807 problem responses.
-  - *Zone 2 (Auth Gateway):* BCrypt hash validation, stateless JWT filter (15-30m token expiration).
+  - *Zone 1 (Perimeter):* CORS origin lock, rate limiting, standard JSON error responses.
+  - *Zone 2 (Auth Gateway):* Argon2/BCrypt password hashing, stateless JWT authentication.
   - *Zone 3 (Tenant Guard):* Ownership verification (`orders.user_id == jwt.sub`) preventing IDOR vulnerabilities; PII masking.
-  - *Zone 4 (RBAC Matrix):* Server-enforced roles: `CUSTOMER`, `SUPPORT_AGENT`, `OPS_MANAGER`, `CATALOG_MANAGER`, `KNOWLEDGE_ADMIN`, `ADMIN`, `AGENT_RUNTIME`.
+  - *Zone 4 (RBAC Matrix):* Server-enforced roles: `CUSTOMER`, `SUPPORT_AGENT`, `OPS_MANAGER`, `CATALOG_MANAGER`, `KNOWLEDGE_ADMIN`, `ADMIN`.
 
 ### 13. AI Safety, Anti-Hallucination & Guardrails
 - **File:** [`13_ai_safety_guardrails.svg`](13_ai_safety_guardrails.svg)
 - **Purpose:** 5-tier guardrail defense system enforcing AI reliability and deterministic safety.
 - **Guardrail Tiers:**
   - *Tier 1 (Input):* Prompt injection scanning, system prompt isolation, delimiter quarantine.
-  - *Tier 2 (Grounding):* PostgreSQL-only catalog query builder; RAG similarity threshold check (no outside knowledge).
-  - *Tier 3 (Schema & Timeout):* Strictly typed JSON validation via Jackson/Pydantic; 10s model timeout; deterministic fallback handlers.
+  - *Tier 2 (Grounding):* SQLite-only catalog query builder; RAG similarity threshold check (`score >= 0.22`, no outside knowledge).
+  - *Tier 3 (Schema & Timeout):* Strictly typed JSON validation; 15s model timeout with bounded retries; deterministic fallback handlers.
   - *Tier 4 (Tools):* Scoped tool allowlists; idempotency keys on mutations; human-in-the-loop approval gates; anti-falsehood checks.
   - *Tier 5 (Output & Audit):* Product ID existence check before UI rendering; PII redaction; immutable audit trail logging.
 
@@ -213,9 +211,9 @@ c:\Shop_smart_ai\
 - **Purpose:** Architecture and recovery workflows for 8 critical edge cases defined in PRD §14 & §15.
 - **Covered Scenarios:**
   - *Double-click Checkout:* Idempotency key collision replays cached order; zero duplicate charge.
-  - *Stock Race / Oversell:* Pessimistic lock fails; transaction rolls back; returns `409 Conflict` + available alternatives.
+  - *Stock Race / Oversell:* Concurrency check fails; transaction aborts; returns `409 Conflict` + available alternatives.
   - *AI Model Timeout / Rate Limit:* Circuit breaker triggers fallback to keyword search and category facets.
-  - *Malformed Model JSON:* Schema validation failure triggers 1 corrective retry, then falls back safely.
+  - *Malformed Model JSON:* Schema validation failure triggers fallback safely.
   - *Missing RAG Evidence:* Similarity below threshold returns safe fallback (`confidence: NONE`); zero hallucinated policies.
   - *Contradictory Policies:* Selects latest effective date; flags `confidence: LOW`; alerts Admin review queue.
   - *Cancel Shipped Order:* State machine invariant violation blocks cancellation with explicit shipping SLA reason.
@@ -225,9 +223,9 @@ c:\Shop_smart_ai\
 - **File:** [`15_observability_audit_eval.svg`](15_observability_audit_eval.svg)
 - **Purpose:** Comprehensive observability topography, audit trail, and evaluation testing framework.
 - **Architectural Triad:**
-  - *Distributed Tracing & Metrics:* End-to-end `traceId` propagation across HTTP, Spring AI, tools, and PostgreSQL. Micrometer latency SLAs.
+  - *Distributed Tracing & Metrics:* End-to-end `traceId` propagation across HTTP, tools, and SQLite. In-process latency metrics.
   - *AI Traces & Audits:* Complete `assistant_messages.metadata` trace captures query, sanitized query, retrieved chunks, raw output, validated output, and latency. Immutable `audit_logs` table records state diffs.
-  - *Testing Strategy & Golden Data:* Testing pyramid (JUnit 5 unit tests, Testcontainers PostgreSQL integration tests, E2E customer flow tests). Curated RAG Golden Dataset (20 policy Q&As, 5 manual Q&As, 5 no-evidence cases, 3 contradictions). 5 Live Demo evaluation checklists.
+  - *Testing Strategy & Golden Data:* Testing pyramid: Node.js native test runner (`node:test`) integration test suites (32 automated tests covering auth, catalog, cart, orders, RAG, agent tools, shopping assistant). Curated RAG Golden Dataset (policy Q&As, no-evidence cases). 5 Live Demo evaluation checklists.
 
 ---
 

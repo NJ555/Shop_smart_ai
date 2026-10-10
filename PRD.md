@@ -3,8 +3,7 @@
 
 **Document Version:** 1.0.0  
 **Status:** Draft for Engineering / Hackathon Review  
-**Author Perspective:** Senior Product Engineer / Senior SWE / AI Engineer / System Architect  
-**Primary Stack Constraint:** React 19 + Vite, Java + Spring Boot 3 + Spring AI, PostgreSQL + PgVector, approved AI models  
+**Primary Stack Architecture:** Next.js 14 (Web) + Expo / React Native (Mobile), Node.js 22 + Express 4 modular monolith, SQLite (WAL mode) with 128-dim hybrid vector RAG, DeepSeek AI (deepseek-v4.1-flash:free)  
 **Scope Positioning:** Hackathon-implementable MVP with production-grade architecture, safety, explainability, and extensibility  
 **Explicit Scope Note:** Real payment processing, real carrier integrations, and real warehouse systems are **out of scope** for the hackathon. Orders, payments, shipment events, and operational actions may be simulated where stated.
 
@@ -303,12 +302,13 @@ The following are explicitly out of scope for this hackathon:
 ```text
 ┌────────────────────────────────────────────────────────────┐
 │                      FRONTEND                              │
-│             React 19 + Vite (Responsive UI)                │
+│       Next.js 14 (Web Storefront + Admin Console)          │
+│       Expo / React Native (Mobile Storefront & Assistant)  │
 │  Customer Store | Assistant UI | Support UI | Admin UI     │
 └──────────────────────────┬─────────────────────────────────┘
-                           │ HTTPS / JSON
+                           │ HTTPS / JSON (/api/v1)
 ┌──────────────────────────▼─────────────────────────────────┐
-│                 SPRING BOOT 3 BACKEND                      │
+│              NODE.JS 22 + EXPRESS 4 BACKEND                │
 │                                                            │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   │
 │  │ Identity     │   │ Catalog      │   │ Search       │   │
@@ -317,27 +317,27 @@ The following are explicitly out of scope for this hackathon:
 │                                                            │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   │
 │  │ Cart & Order │   │ Shipment &   │   │ Support &    │   │
-│  │              │   │ Fulfillment  │   │ Tickets      │   │
+│  │ (Idempotency)│   │ Fulfillment  │   │ Tickets      │   │
 │  └──────────────┘   └──────────────┘   └──────────────┘   │
 │                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │                  AI LAYER                            │  │
-│  │  Shopping Assistant | Knowledge RAG | Agent Orchestr.│  │
-│  │  Spring AI adapters, prompt templates, tool calling  │  │
+│  │  Shopping Assistant | Knowledge RAG | Agent Runtime  │  │
+│  │  DeepSeek LLM (live key) + Local 128-dim Hybrid RAG  │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │        CROSS-CUTTING: AuthZ, Validation, Audit,      │  │
-│  │        Idempotency, Rate Limiting, Observability     │  │
+│  │        CROSS-CUTTING: RBAC Auth, Zod Validation,     │  │
+│  │        Audit Trail, Outbox Events, Rate Limiting     │  │
 │  └──────────────────────────────────────────────────────┘  │
 └──────────────────────────┬─────────────────────────────────┘
-                           │
+                           │ node:sqlite (WAL mode)
 ┌──────────────────────────▼─────────────────────────────────┐
 │                    DATA LAYER                              │
-│  PostgreSQL + PgVector                                     │
-│  - relational domain data                                  │
-│  - vector embeddings                                       │
-│  - audit and outbox tables                                 │
+│  SQLite 3 (shopsmart.db, WAL Mode, Foreign Keys ON)        │
+│  - relational domain data (products, orders, users)        │
+│  - 128-dim vector embeddings (knowledge_chunks)            │
+│  - audit_logs and outbox_events tables                     │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -347,61 +347,60 @@ Use a **modular monolith**.
 
 ### Why modular monolith?
 
-- Easier to run in hackathon
-- Simpler testing
+- Fast, reproducible local boot with zero external database containers
+- Simpler testing and deterministic state management
 - Fewer distributed failure modes
-- Still allows clean module boundaries
-- Can later be decomposed if needed
+- Still enforces clean module boundaries
+- Can later be decomposed into microservices if needed
 
 ## 4.3 Module Boundaries
 
 | Module | Responsibility |
 |---|---|
-| `identity` | Users, authentication, roles, preferences, membership |
-| `catalog` | Categories, products, attributes, images |
-| `inventory` | Stock levels, reservations, availability |
-| `search` | Filtering, sorting, pagination, text search |
-| `wishlist` | Saved items |
-| `cart` | Cart items, validation, price re-check |
-| `order` | Checkout, order lifecycle |
-| `shipment` | Shipment lifecycle and simulated carrier events |
-| `support` | Tickets, conversations, escalations |
-| `knowledge` | Documents, chunks, embeddings, RAG |
-| `assistant` | AI shopping assistant orchestration |
-| `agent` | Agentic workflows and tool execution |
-| `admin` | Ops screens and internal actions |
-| `audit` | Logs of AI and operational actions |
+| `identity` | Users, authentication (JWT), roles, preferences, membership |
+| `catalog` | Categories, products, attributes, images, compare |
+| `inventory` | Stock levels, reservations, availability rules |
+| `search` | Filtering, sorting, pagination, multi-attribute search |
+| `wishlist` | Customer saved items |
+| `cart` | Cart items, validation, price re-checking |
+| `order` | Idempotent checkout, order lifecycle state machine |
+| `shipment` | Shipment progression and simulated carrier events |
+| `support` | Tickets, messages, escalation workflows |
+| `knowledge` | Documents, section-aware chunking, 128-dim embeddings, RAG |
+| `assistant` | Natural-language discovery, constraint extraction, deterministic ranking |
+| `agent` | Tool execution runtime (11 tools), runs, admin approvals |
+| `admin` | System overview, inventory adjustments, document management |
+| `audit` | Comprehensive audit trail of mutations and agent executions |
 
 ## 4.4 Technology Choices
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19 + Vite |
-| UI | Responsive, accessible component system |
-| State management | React Query / Zustand or equivalent |
-| Backend | Java 21+, Spring Boot 3 |
-| AI integration | Spring AI |
-| ORM/Data | Spring Data JPA / JDBC |
-| DB | PostgreSQL 15+ |
-| Vector search | PgVector |
-| Validation | Jakarta Bean Validation |
-| Auth | JWT + role-based authorization |
-| Testing | JUnit, Testcontainers, Playwright/Cypress optional |
-| API docs | OpenAPI 3 |
-| Local run | Docker Compose |
+| Web Frontend | Next.js 14 + React 18 + TypeScript |
+| Mobile Frontend | Expo / React Native + TypeScript (shared /api/v1 backend) |
+| UI Design | Responsive, modern aesthetic with glassmorphism & dark/light tones |
+| Backend | Node.js 22+ (LTS) + Express 4.19 modular monolith |
+| AI Integration | DeepSeek LLM (`deepseek-v4.1-flash:free` via OpenAI-compatible endpoint) |
+| RAG / Vector Engine | 128-dimensional L2-normalized vector embeddings + cosine/keyword hybrid scoring |
+| Database Engine | SQLite via Node 22 built-in `node:sqlite` (WAL mode, foreign keys ON) |
+| Validation | Zod schema validation & request sanitization |
+| Auth & Security | JWT (HMAC SHA-256) + RBAC + helmet + rate-limiting |
+| Testing | Node.js native test runner (`node:test`, `node:assert/strict`) |
+| Local Execution | Local Node.js runtime (`npm start`, `npm run dev`) |
 
 ## 4.5 Key Architectural Decisions
 
 | Decision | Rationale |
 |---|---|
-| Modular monolith | Lower hackathon complexity, high coherence |
-| PostgreSQL as single source of truth | Relational integrity + vector search |
-| AI responses must reference real records | Prevent hallucination |
-| Tool-based agent actions | Safe, explicit, auditable operations |
-| Server-side validation for all actions | Never trust model output directly |
-| Simulated external integrations behind interfaces | Replaceable with real systems later |
-| Deterministic mock model adapters | Reliable live demo even without external model access |
-| Outbox pattern for events | Future-proof async processing |
+| Modular monolith | Minimal operational overhead, zero Docker prerequisites, rapid execution |
+| SQLite as single source of truth | Atomic ACID transactions, zero network latency, embedded vector storage |
+| Grounded AI responses | Every recommendation and policy citation verified against DB records |
+| Tool-based agent actions | Safe, explicit, auditable operations gated by strict role checks |
+| Server-side recalculation | Prices, totals, discounts, and inventory revalidated on the server |
+| Simulated external adapters | Payment (`PAID_SIMULATED`) and carrier progression without third-party dependencies |
+| Deterministic fallback | Guaranteed operational resilience even during external AI rate limits or outages |
+| Outbox event pattern | Transactional event dispatching ready for asynchronous messaging (e.g. Kafka) |
+
 
 ---
 
@@ -774,7 +773,7 @@ The model must output structured JSON only.
 
 The assistant must:
 
-- Query only product records from PostgreSQL.
+- Query only product records from the database (SQLite).
 - Use validated constraints to build filters.
 - Never use model-generated product objects.
 - Never return product data not present in DB.
@@ -946,7 +945,7 @@ Provide enterprise-grade answers only from approved documents such as:
 | RAG-003 | Parse and normalize text | MVP |
 | RAG-004 | Chunk documents | MVP |
 | RAG-005 | Generate embeddings | MVP |
-| RAG-006 | Store embeddings in PgVector | MVP |
+| RAG-006 | Store 128-dim embeddings in SQLite | MVP |
 | RAG-007 | Retrieve relevant chunks | MVP |
 | RAG-008 | Generate grounded answers | MVP |
 | RAG-009 | Return citations | MVP |
@@ -1822,14 +1821,12 @@ Unique candidate: `(title, version, region)` or business equivalent.
 | chunk_index | INT | |
 | heading | TEXT | |
 | content | TEXT | |
-| embedding | VECTOR | PgVector |
-| metadata | JSONB | |
-| created_at | TIMESTAMP | |
+| embedding | TEXT | JSON array (128-dim normalized vector) |
+| metadata | TEXT | JSON metadata (version, category, region) |
+| created_at | TEXT | ISO8601 |
 
 Indexes:
-- HNSW/IVFFAT index on `embedding`
-- `(document_id)`
-- metadata GIN index if needed
+- `idx_chunks_doc` on `(document_id)`
 
 ### `assistant_conversations`
 
@@ -2252,7 +2249,7 @@ Idempotency-Key: inv_adjust_123
 
 # 12. Event Contracts & Async Flows
 
-For MVP, events can be handled via Spring events + outbox table. For production, replace with Kafka if needed.
+For MVP, events are handled via in-process event handlers + transactional `outbox_events` table (ready for Kafka bridge in production).
 
 ## 12.1 Event Topics / Types
 
@@ -3071,7 +3068,7 @@ Agent action must expose:
 | Level | Coverage |
 |---|---|
 | Unit tests | Services, validators, state machines |
-| Integration tests | APIs + DB + Spring AI mocks |
+| Integration tests | APIs + SQLite DB + DeepSeek LLM wrapper & fallbacks |
 | E2E tests | Main customer flows |
 | AI eval tests | Golden datasets for shopping/RAG |
 | Manual demo tests | Live scenario checklists |
@@ -3204,76 +3201,99 @@ Create at least:
 
 ## 22.1 Prerequisites
 
-- Java 21+
-- Node 20+
-- Docker + Docker Compose
-- PostgreSQL with PgVector image
-- Optional: model API key or local model runtime
+- Node.js 20+ (Node.js 22 LTS recommended for built-in `node:sqlite`)
+- npm 10+
+- DeepSeek API Key or TokenHarbor API Key (OpenAI-compatible)
 
 ## 22.2 Repository Layout
 
 ```text
 shopsmart-ai/
-  backend/
-    src/main/java/...
-    src/main/resources/
-  frontend/
+  backend/           # Node.js 22 + Express modular monolith (/api/v1)
     src/
-  docker-compose.yml
-  seed/
-  docs/
+      index.js       # App entry & middleware mounts
+      config.js      # Environment & LLM configuration
+      db.js          # SQLite connection (WAL mode)
+      middleware/    # Auth, errors, idempotency, rateLimit
+      utils/         # LLM, embeddings, ranking, retrieval, prompts, ids
+      modules/       # Domain modules (identity, catalog, cart, order, etc.)
+      seed/          # Seed scripts
+    tests/           # Native test suites (node:test)
+  db/                # SQLite database (schema.sql, seed-data.json, knowledge_docs)
+  frontend-web/      # Next.js 14 + React 18 storefront & admin console
+  frontend-app/      # React Native / Expo mobile application
+  explanation.md     # Deep architecture, RAG, and production audit document
 ```
 
 ## 22.3 Environment Variables
 
-Backend:
+Backend (`backend/.env`):
 
 ```properties
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/shopsmart
-SPRING_DATASOURCE_USERNAME=shopsmart
-SPRING_DATASOURCE_PASSWORD=shopsmart
-AI_PROVIDER=mock|openai|ollama|other
-AI_API_KEY=...
-EMBEDDING_PROVIDER=mock|openai|ollama|other
-JWT_SECRET=...
+PORT=4000
+DB_PATH=../db/shopsmart.db
+JWT_SECRET=replace-with-a-secure-random-secret
+JWT_EXPIRES_IN=1800
+FRONTEND_ORIGIN=http://localhost:3000
+REFUND_APPROVAL_THRESHOLD=100
+
+# Option A: Direct DeepSeek
+# DEEPSEEK_API_KEY=your_key
+# DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+# DEEPSEEK_MODEL=deepseek-chat
+
+# Option B: TokenHarbor Gateway
+TOKENHARBOR_API_KEY=your_tokenharbor_key
+TOKENHARBOR_BASE_URL=https://tokenharbor.ai/v1
+TOKENHARBOR_MODEL=deepseek-v4.1-flash:free
 ```
 
-Frontend:
+Frontend Web (`frontend-web/.env.local`):
 
 ```properties
-VITE_API_BASE_URL=http://localhost:8080/api/v1
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
 ```
 
 ## 22.4 Local Run
 
+Backend:
 ```bash
-docker compose up -d db
 cd backend
-./mvnw spring-boot:run
-cd ../frontend
+npm install
+node src/seed/seed.js
+npm start
+```
+
+Web Storefront:
+```bash
+cd frontend-web
 npm install
 npm run dev
 ```
 
+Run Automated Tests:
+```bash
+cd backend
+npm test
+```
+
 ## 22.5 Seed Data
 
-Seed:
+Seeded catalog:
+- 4 categories (Laptops, Smartphones, Home Appliances, Accessories)
+- 52 realistic products (13 per category, meeting the 10-20 target)
+- 10 users across customer and staff roles
+- 5 active policy documents (24 chunks with 128-dim embeddings)
+- Sample orders across multiple statuses with simulated tracking events
+- Pending admin refund approvals and support tickets
 
-- 3 categories
-- 20+ products
-- 3 users (customer, support, admin)
-- 3 policy documents
-- 2 sample orders
-- 1 shipment simulation
+## 22.6 Deterministic Fallback & Grounding
 
-## 22.6 Mock AI Mode
-
-For deterministic demo:
-
-- `AI_PROVIDER=mock`
-- Mock shopping assistant returns structured extraction.
-- Mock embedding service returns deterministic vectors.
-- This ensures hackathon demo reliability.
+If the live DeepSeek LLM is unreachable or times out:
+- Shopping Assistant falls back to deterministic rule extraction + DB ranking.
+- Knowledge RAG falls back to top cited document chunk sentences.
+- Operations Agent falls back to verified tool outputs.
+- Grounding invariant is strictly maintained: no invented products, prices, or policies.
 
 ---
 

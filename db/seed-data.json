@@ -1,0 +1,951 @@
+{
+  "categories": [
+    { "id": "cat_laptops", "name": "Laptops", "slug": "laptops" },
+    { "id": "cat_phones", "name": "Smartphones", "slug": "smartphones" },
+    { "id": "cat_appliances", "name": "Home Appliances", "slug": "appliances" },
+    { "id": "cat_accessories", "name": "Accessories", "slug": "accessories" }
+  ],
+  "products": [
+    {
+      "id": "LAP101",
+      "name": "Dell Inspiron 15",
+      "brand": "Dell",
+      "category": "laptops",
+      "price": 949.0,
+      "rating": 4.3,
+      "inventory": 12,
+      "description": "15.6 inch laptop with Intel i7, 16GB RAM and 512GB SSD. Great for Java development and AI learning projects.",
+      "attributes": {
+        "cpu": "Intel i7",
+        "gpu": "Integrated",
+        "ram": "16GB",
+        "storage": "512GB SSD",
+        "screen_size": "15.6 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap101/600/400"]
+    },
+    {
+      "id": "LAP102",
+      "name": "Lenovo ThinkPad E14",
+      "brand": "Lenovo",
+      "category": "laptops",
+      "price": 899.0,
+      "rating": 4.5,
+      "inventory": 8,
+      "description": "Business laptop with Ryzen 7 and 16GB RAM. Excellent keyboard for long coding sessions and Java development.",
+      "attributes": {
+        "cpu": "AMD Ryzen 7",
+        "gpu": "Integrated",
+        "ram": "16GB",
+        "storage": "512GB SSD",
+        "screen_size": "14 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap102/600/400"]
+    },
+    {
+      "id": "LAP103",
+      "name": "HP Pavilion 15",
+      "brand": "HP",
+      "category": "laptops",
+      "price": 749.0,
+      "rating": 4.1,
+      "inventory": 15,
+      "description": "Everyday 15.6 inch laptop for students and home office multitasking with fast SSD storage.",
+      "attributes": {
+        "cpu": "Intel i5",
+        "gpu": "Integrated",
+        "ram": "8GB",
+        "storage": "512GB SSD",
+        "screen_size": "15.6 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap103/600/400"]
+    },
+    {
+      "id": "LAP104",
+      "name": "Asus ROG Strix G16",
+      "brand": "Asus",
+      "category": "laptops",
+      "price": 1299.0,
+      "rating": 4.7,
+      "inventory": 5,
+      "description": "Gaming and ML-ready laptop with dedicated RTX 4060 GPU and 32GB RAM for intensive AI workloads.",
+      "attributes": {
+        "cpu": "Intel i7",
+        "gpu": "Dedicated RTX 4060",
+        "ram": "32GB",
+        "storage": "1TB SSD",
+        "screen_size": "16 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap104/600/400"]
+    },
+    {
+      "id": "LAP105",
+      "name": "Acer Aspire Lite",
+      "brand": "Acer",
+      "category": "laptops",
+      "price": 549.0,
+      "rating": 3.9,
+      "inventory": 20,
+      "description": "Budget 15.6 inch laptop for everyday tasks, web browsing, and beginner computer science courses.",
+      "attributes": {
+        "cpu": "AMD Ryzen 5",
+        "gpu": "Integrated",
+        "ram": "8GB",
+        "storage": "512GB SSD",
+        "screen_size": "15.6 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap105/600/400"]
+    },
+    {
+      "id": "LAP106",
+      "name": "Apple MacBook Air M2",
+      "brand": "Apple",
+      "category": "laptops",
+      "price": 999.0,
+      "rating": 4.8,
+      "inventory": 14,
+      "description": "Strikingly thin laptop with Apple M2 chip, 16GB unified memory, silent fanless cooling, and up to 18 hours of battery.",
+      "attributes": {
+        "cpu": "Apple M2",
+        "gpu": "Integrated 8-core",
+        "ram": "16GB",
+        "storage": "256GB SSD",
+        "screen_size": "13.6 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap106/600/400"]
+    },
+    {
+      "id": "LAP107",
+      "name": "Dell XPS 13",
+      "brand": "Dell",
+      "category": "laptops",
+      "price": 1199.0,
+      "rating": 4.6,
+      "inventory": 7,
+      "description": "Premium ultraportable laptop with 13.4 inch InfinityEdge FHD+ display, Intel i7-1360P, and machined aluminum build.",
+      "attributes": {
+        "cpu": "Intel i7",
+        "gpu": "Intel Iris Xe",
+        "ram": "16GB",
+        "storage": "512GB SSD",
+        "screen_size": "13.4 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap107/600/400"]
+    },
+    {
+      "id": "LAP108",
+      "name": "Lenovo Legion 5 Pro",
+      "brand": "Lenovo",
+      "category": "laptops",
+      "price": 1399.0,
+      "rating": 4.8,
+      "inventory": 6,
+      "description": "High performance workstation with Ryzen 7 7745HX, dedicated RTX 4070 GPU, and 32GB RAM for gaming and deep learning.",
+      "attributes": {
+        "cpu": "AMD Ryzen 7",
+        "gpu": "Dedicated RTX 4070",
+        "ram": "32GB",
+        "storage": "1TB SSD",
+        "screen_size": "16 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap108/600/400"]
+    },
+    {
+      "id": "LAP109",
+      "name": "HP Envy x360 2-in-1",
+      "brand": "HP",
+      "category": "laptops",
+      "price": 849.0,
+      "rating": 4.4,
+      "inventory": 11,
+      "description": "Versatile 360-degree convertible laptop with 15.6 inch FHD touch display, Intel i7, and 1TB SSD for mobile productivity.",
+      "attributes": {
+        "cpu": "Intel i7",
+        "gpu": "Intel Iris Xe",
+        "ram": "16GB",
+        "storage": "1TB SSD",
+        "screen_size": "15.6 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap109/600/400"]
+    },
+    {
+      "id": "LAP110",
+      "name": "Asus ZenBook 14 OLED",
+      "brand": "Asus",
+      "category": "laptops",
+      "price": 899.0,
+      "rating": 4.6,
+      "inventory": 9,
+      "description": "Stunning 2.8K 120Hz OLED laptop with Intel Core Ultra 7 processor and dedicated neural processing unit for AI acceleration.",
+      "attributes": {
+        "cpu": "Intel Core Ultra 7",
+        "gpu": "Intel Arc",
+        "ram": "16GB",
+        "storage": "1TB SSD",
+        "screen_size": "14 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap110/600/400"]
+    },
+    {
+      "id": "LAP111",
+      "name": "Acer Swift Go 14",
+      "brand": "Acer",
+      "category": "laptops",
+      "price": 699.0,
+      "rating": 4.2,
+      "inventory": 18,
+      "description": "Compact and lightweight 14 inch notebook with Intel i5-13500H, 16GB RAM, and bright 100% sRGB screen for coding on the go.",
+      "attributes": {
+        "cpu": "Intel i5",
+        "gpu": "Intel Iris Xe",
+        "ram": "16GB",
+        "storage": "512GB SSD",
+        "screen_size": "14 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap111/600/400"]
+    },
+    {
+      "id": "LAP112",
+      "name": "Microsoft Surface Laptop 5",
+      "brand": "Microsoft",
+      "category": "laptops",
+      "price": 999.0,
+      "rating": 4.3,
+      "inventory": 10,
+      "description": "Sleek and elegant 13.5 inch PixelSense touchscreen laptop with Intel i5, all-day battery, and Omnisonic speakers.",
+      "attributes": {
+        "cpu": "Intel i5",
+        "gpu": "Intel Iris Xe",
+        "ram": "8GB",
+        "storage": "256GB SSD",
+        "screen_size": "13.5 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap112/600/400"]
+    },
+    {
+      "id": "LAP113",
+      "name": "MSI Creator M16",
+      "brand": "MSI",
+      "category": "laptops",
+      "price": 1149.0,
+      "rating": 4.5,
+      "inventory": 4,
+      "description": "Dedicated creator workstation with Intel i7-13700H, RTX 4050 graphics, 16GB RAM, and calibrated Golden Ratio QHD+ display.",
+      "attributes": {
+        "cpu": "Intel i7",
+        "gpu": "Dedicated RTX 4050",
+        "ram": "16GB",
+        "storage": "1TB SSD",
+        "screen_size": "16 inch"
+      },
+      "images": ["https://picsum.photos/seed/lap113/600/400"]
+    },
+    {
+      "id": "PHN201",
+      "name": "Samsung Galaxy A54",
+      "brand": "Samsung",
+      "category": "smartphones",
+      "price": 449.0,
+      "rating": 4.4,
+      "inventory": 25,
+      "description": "Mid-range 5G smartphone with 50MP OIS camera, 5000mAh battery, and vibrant 120Hz Super AMOLED display.",
+      "attributes": {
+        "ram": "6GB",
+        "storage": "128GB",
+        "camera": "50MP",
+        "battery": "5000mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn201/600/400"]
+    },
+    {
+      "id": "PHN202",
+      "name": "Google Pixel 7a",
+      "brand": "Google",
+      "category": "smartphones",
+      "price": 499.0,
+      "rating": 4.5,
+      "inventory": 18,
+      "description": "Camera-first smartphone powered by Google Tensor G2 with clean Android, wireless charging, and 64MP wide camera.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "128GB",
+        "camera": "64MP",
+        "battery": "4385mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn202/600/400"]
+    },
+    {
+      "id": "PHN203",
+      "name": "iPhone SE 2022",
+      "brand": "Apple",
+      "category": "smartphones",
+      "price": 429.0,
+      "rating": 4.2,
+      "inventory": 10,
+      "description": "Compact and powerful iPhone with Apple A15 Bionic chip, 4.7 inch Retina HD display, and classic Touch ID home button.",
+      "attributes": {
+        "ram": "4GB",
+        "storage": "64GB",
+        "camera": "12MP",
+        "battery": "2018mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn203/600/400"]
+    },
+    {
+      "id": "PHN204",
+      "name": "OnePlus Nord CE3",
+      "brand": "OnePlus",
+      "category": "smartphones",
+      "price": 349.0,
+      "rating": 4.1,
+      "inventory": 30,
+      "description": "Fast and smooth smartphone with Snapdragon 782G, 80W SuperVOOC rapid charging, and 50MP Sony IMX890 sensor.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "128GB",
+        "camera": "50MP",
+        "battery": "5000mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn204/600/400"]
+    },
+    {
+      "id": "PHN205",
+      "name": "Xiaomi Redmi Note 13",
+      "brand": "Xiaomi",
+      "category": "smartphones",
+      "price": 249.0,
+      "rating": 4.0,
+      "inventory": 0,
+      "description": "Budget smartphone with ultra-clear 108MP camera, 120Hz FHD+ AMOLED display, and slim bezel design.",
+      "attributes": {
+        "ram": "6GB",
+        "storage": "128GB",
+        "camera": "108MP",
+        "battery": "5000mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn205/600/400"]
+    },
+    {
+      "id": "PHN206",
+      "name": "Apple iPhone 15",
+      "brand": "Apple",
+      "category": "smartphones",
+      "price": 799.0,
+      "rating": 4.8,
+      "inventory": 20,
+      "description": "Next-generation iPhone featuring Dynamic Island, 48MP main camera with 2x Telephoto, USB-C, and color-infused glass.",
+      "attributes": {
+        "ram": "6GB",
+        "storage": "128GB",
+        "camera": "48MP",
+        "battery": "3349mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn206/600/400"]
+    },
+    {
+      "id": "PHN207",
+      "name": "Samsung Galaxy S23 FE",
+      "brand": "Samsung",
+      "category": "smartphones",
+      "price": 599.0,
+      "rating": 4.5,
+      "inventory": 16,
+      "description": "Flagship experience phone with Snapdragon 8 Gen 1, IP68 water resistance, pro-grade zoom camera, and DeX support.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "128GB",
+        "camera": "50MP",
+        "battery": "4500mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn207/600/400"]
+    },
+    {
+      "id": "PHN208",
+      "name": "Google Pixel 8",
+      "brand": "Google",
+      "category": "smartphones",
+      "price": 699.0,
+      "rating": 4.7,
+      "inventory": 12,
+      "description": "State of the art Google AI smartphone with Tensor G3, Actua display, Best Take camera editing, and 7 years of OS updates.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "128GB",
+        "camera": "50MP",
+        "battery": "4575mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn208/600/400"]
+    },
+    {
+      "id": "PHN209",
+      "name": "Motorola Edge 40 Neo",
+      "brand": "Motorola",
+      "category": "smartphones",
+      "price": 329.0,
+      "rating": 4.3,
+      "inventory": 22,
+      "description": "Ultra-slim lifestyle phone with curved 144Hz pOLED display, Pantone certified colors, and IP68 underwater protection.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "256GB",
+        "camera": "50MP",
+        "battery": "5000mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn209/600/400"]
+    },
+    {
+      "id": "PHN210",
+      "name": "OnePlus 12R",
+      "brand": "OnePlus",
+      "category": "smartphones",
+      "price": 499.0,
+      "rating": 4.6,
+      "inventory": 15,
+      "description": "Flagship killer with Snapdragon 8 Gen 2, 4th Gen LTPO 120Hz ProXDR display, and enormous 5500mAh battery with 100W charge.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "128GB",
+        "camera": "50MP",
+        "battery": "5500mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn210/600/400"]
+    },
+    {
+      "id": "PHN211",
+      "name": "Nothing Phone (2a)",
+      "brand": "Nothing",
+      "category": "smartphones",
+      "price": 349.0,
+      "rating": 4.4,
+      "inventory": 17,
+      "description": "Iconic transparent back design with Glyph light interface, custom Dimensity 7200 Pro chipset, and clean Nothing OS.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "128GB",
+        "camera": "50MP",
+        "battery": "5000mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn211/600/400"]
+    },
+    {
+      "id": "PHN212",
+      "name": "Sony Xperia 10 V",
+      "brand": "Sony",
+      "category": "smartphones",
+      "price": 399.0,
+      "rating": 4.1,
+      "inventory": 9,
+      "description": "World's lightest 5000mAh 5G phone with cinematic 21:9 OLED display, 3.5mm headphone jack, and front stereo speakers.",
+      "attributes": {
+        "ram": "6GB",
+        "storage": "128GB",
+        "camera": "48MP",
+        "battery": "5000mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn212/600/400"]
+    },
+    {
+      "id": "PHN213",
+      "name": "Asus Zenfone 10",
+      "brand": "Asus",
+      "category": "smartphones",
+      "price": 699.0,
+      "rating": 4.6,
+      "inventory": 8,
+      "description": "Compact 5.9 inch flagship phone with Snapdragon 8 Gen 2, 6-Axis Hybrid Gimbal camera stabilizer, and wireless charging.",
+      "attributes": {
+        "ram": "8GB",
+        "storage": "256GB",
+        "camera": "50MP",
+        "battery": "4300mAh"
+      },
+      "images": ["https://picsum.photos/seed/phn213/600/400"]
+    },
+    {
+      "id": "HAP301",
+      "name": "Philips Air Fryer XL",
+      "brand": "Philips",
+      "category": "appliances",
+      "price": 149.0,
+      "rating": 4.6,
+      "inventory": 14,
+      "description": "XL 6.2L air fryer for family cooking with Rapid Air technology for crispy results with 90% less oil.",
+      "attributes": {
+        "capacity": "6.2L",
+        "power": "2000W",
+        "type": "Air Fryer"
+      },
+      "images": ["https://picsum.photos/seed/hap301/600/400"]
+    },
+    {
+      "id": "HAP302",
+      "name": "Dyson V12 Detect Slim",
+      "brand": "Dyson",
+      "category": "appliances",
+      "price": 649.0,
+      "rating": 4.7,
+      "inventory": 6,
+      "description": "Lightweight cordless stick vacuum with laser dust detection that reveals invisible particles on hardwood floors.",
+      "attributes": {
+        "bin": "0.35L",
+        "runtime": "60 min",
+        "type": "Cordless Vacuum"
+      },
+      "images": ["https://picsum.photos/seed/hap302/600/400"]
+    },
+    {
+      "id": "HAP303",
+      "name": "LG Front Load Washer 7kg",
+      "brand": "LG",
+      "category": "appliances",
+      "price": 799.0,
+      "rating": 4.3,
+      "inventory": 4,
+      "description": "7kg smart front load washing machine featuring AI Direct Drive, 1200 RPM spin, and allergen-reducing steam wash.",
+      "attributes": {
+        "capacity": "7kg",
+        "rpm": "1200",
+        "type": "Front Load Washer"
+      },
+      "images": ["https://picsum.photos/seed/hap303/600/400"]
+    },
+    {
+      "id": "HAP304",
+      "name": "Instant Pot Duo 7-in-1",
+      "brand": "Instant Pot",
+      "category": "appliances",
+      "price": 99.0,
+      "rating": 4.5,
+      "inventory": 22,
+      "description": "7-in-1 multi-cooker: pressure cooker, slow cooker, rice cooker, steamer, sauté pan, yogurt maker, and food warmer.",
+      "attributes": {
+        "capacity": "5.7L",
+        "functions": "7-in-1",
+        "type": "Electric Cooker"
+      },
+      "images": ["https://picsum.photos/seed/hap304/600/400"]
+    },
+    {
+      "id": "HAP305",
+      "name": "Daikin 1.5T Split AC",
+      "brand": "Daikin",
+      "category": "appliances",
+      "price": 899.0,
+      "rating": 4.2,
+      "inventory": 3,
+      "description": "1.5 Ton 5-star inverter split air conditioner for medium rooms with PM2.5 air filtration and silent operation.",
+      "attributes": {
+        "capacity": "1.5 Ton",
+        "rating_iseeer": "5 Star",
+        "type": "Split AC"
+      },
+      "images": ["https://picsum.photos/seed/hap305/600/400"]
+    },
+    {
+      "id": "HAP306",
+      "name": "Breville Barista Touch Espresso",
+      "brand": "Breville",
+      "category": "appliances",
+      "price": 999.0,
+      "rating": 4.9,
+      "inventory": 5,
+      "description": "Automated touchscreen espresso machine with integrated precision conical burr grinder and automatic microfoam milk texturing.",
+      "attributes": {
+        "capacity": "2L",
+        "pressure": "15 Bar",
+        "type": "Espresso Machine"
+      },
+      "images": ["https://picsum.photos/seed/hap306/600/400"]
+    },
+    {
+      "id": "HAP307",
+      "name": "iRobot Roomba j7+",
+      "brand": "iRobot",
+      "category": "appliances",
+      "price": 699.0,
+      "rating": 4.6,
+      "inventory": 8,
+      "description": "Self-emptying robot vacuum with PrecisionVision AI navigation that identifies and avoids cords, pet waste, and small hazards.",
+      "attributes": {
+        "runtime": "75 min",
+        "dock": "Clean Base Self-Empty",
+        "type": "Robot Vacuum"
+      },
+      "images": ["https://picsum.photos/seed/hap307/600/400"]
+    },
+    {
+      "id": "HAP308",
+      "name": "Ninja Foodi Smart XL Grill",
+      "brand": "Ninja",
+      "category": "appliances",
+      "price": 249.0,
+      "rating": 4.7,
+      "inventory": 16,
+      "description": "6-in-1 indoor countertop grill and 4-quart air fryer with built-in smart meat thermometer and smokeless cyclonic grilling.",
+      "attributes": {
+        "capacity": "4 Quart",
+        "temperature": "Up to 500F",
+        "type": "Indoor Grill"
+      },
+      "images": ["https://picsum.photos/seed/hap308/600/400"]
+    },
+    {
+      "id": "HAP309",
+      "name": "Panasonic 27L Convection Microwave",
+      "brand": "Panasonic",
+      "category": "appliances",
+      "price": 219.0,
+      "rating": 4.4,
+      "inventory": 12,
+      "description": "27-liter countertop microwave oven with Inverter technology for even defrosting, roasting, and convection baking.",
+      "attributes": {
+        "capacity": "27L",
+        "power": "1000W Inverter",
+        "type": "Convection Microwave"
+      },
+      "images": ["https://picsum.photos/seed/hap309/600/400"]
+    },
+    {
+      "id": "HAP310",
+      "name": "Samsung 28 cu. ft. Smart Refrigerator",
+      "brand": "Samsung",
+      "category": "appliances",
+      "price": 1799.0,
+      "rating": 4.5,
+      "inventory": 3,
+      "description": "French door refrigerator with Family Hub Wi-Fi touchscreen, Twin Cooling Plus, and dual auto ice maker with ice bites.",
+      "attributes": {
+        "capacity": "28 cu. ft.",
+        "configuration": "French Door",
+        "type": "Smart Refrigerator"
+      },
+      "images": ["https://picsum.photos/seed/hap310/600/400"]
+    },
+    {
+      "id": "HAP311",
+      "name": "De'Longhi Dedica Deluxe Espresso",
+      "brand": "De'Longhi",
+      "category": "appliances",
+      "price": 229.0,
+      "rating": 4.3,
+      "inventory": 15,
+      "description": "Ultra-compact 6-inch slim stainless steel espresso machine with 15-bar professional pump and adjustable manual milk frother.",
+      "attributes": {
+        "capacity": "1.3L",
+        "pressure": "15 Bar",
+        "type": "Espresso Machine"
+      },
+      "images": ["https://picsum.photos/seed/hap311/600/400"]
+    },
+    {
+      "id": "HAP312",
+      "name": "Shark Matrix Plus Robot Vacuum",
+      "brand": "Shark",
+      "category": "appliances",
+      "price": 399.0,
+      "rating": 4.4,
+      "inventory": 10,
+      "description": "2-in-1 robot vacuum and sonic mop with Matrix clean grid navigation, self-emptying bagless base, and anti-allergen seal.",
+      "attributes": {
+        "runtime": "90 min",
+        "mopping": "Sonic Mopping",
+        "type": "Robot Vacuum"
+      },
+      "images": ["https://picsum.photos/seed/hap312/600/400"]
+    },
+    {
+      "id": "HAP313",
+      "name": "Cuisinart Custom 14-Cup Food Processor",
+      "brand": "Cuisinart",
+      "category": "appliances",
+      "price": 199.0,
+      "rating": 4.6,
+      "inventory": 14,
+      "description": "Heavy-duty 14-cup food processor with 720W motor, stainless steel slicing discs, and extra-large feed tube for family meal prep.",
+      "attributes": {
+        "capacity": "14-Cup",
+        "power": "720W",
+        "type": "Food Processor"
+      },
+      "images": ["https://picsum.photos/seed/hap313/600/400"]
+    },
+    {
+      "id": "ACC401",
+      "name": "Logitech MX Master 3S",
+      "brand": "Logitech",
+      "category": "accessories",
+      "price": 99.0,
+      "rating": 4.8,
+      "inventory": 40,
+      "description": "Ergonomic wireless performance mouse for developers with 8000 DPI track-on-glass sensor and quiet click switches.",
+      "attributes": {
+        "connectivity": "Bluetooth + USB-C",
+        "dpi": "8000 DPI",
+        "type": "Mouse"
+      },
+      "images": ["https://picsum.photos/seed/acc401/600/400"]
+    },
+    {
+      "id": "ACC402",
+      "name": "Sony WH-1000XM5",
+      "brand": "Sony",
+      "category": "accessories",
+      "price": 399.0,
+      "rating": 4.7,
+      "inventory": 9,
+      "description": "Industry-leading noise cancelling over-ear headphones with 30-hour battery life, 8 microphones, and ultra-comfortable fit.",
+      "attributes": {
+        "battery": "30 hours",
+        "noise_cancelling": "Yes",
+        "type": "Headphones"
+      },
+      "images": ["https://picsum.photos/seed/acc402/600/400"]
+    },
+    {
+      "id": "ACC403",
+      "name": "Samsung 980 Pro 1TB SSD",
+      "brand": "Samsung",
+      "category": "accessories",
+      "price": 129.0,
+      "rating": 4.6,
+      "inventory": 35,
+      "description": "1TB NVMe PCIe 4.0 internal solid state drive with up to 7,000 MB/s read speeds for fast software compilation and heavy datasets.",
+      "attributes": {
+        "capacity": "1TB",
+        "interface": "NVMe Gen4",
+        "type": "SSD"
+      },
+      "images": ["https://picsum.photos/seed/acc403/600/400"]
+    },
+    {
+      "id": "ACC404",
+      "name": "Anker 737 Power Bank",
+      "brand": "Anker",
+      "category": "accessories",
+      "price": 89.0,
+      "rating": 4.4,
+      "inventory": 50,
+      "description": "High-capacity 24000mAh portable charger with 140W two-way fast charging and smart digital status display.",
+      "attributes": {
+        "capacity": "24000mAh",
+        "output": "140W",
+        "type": "Power Bank"
+      },
+      "images": ["https://picsum.photos/seed/acc404/600/400"]
+    },
+    {
+      "id": "ACC405",
+      "name": "Apple Magic Keyboard",
+      "brand": "Apple",
+      "category": "accessories",
+      "price": 149.0,
+      "rating": 4.3,
+      "inventory": 2,
+      "description": "Slim wireless rechargeable keyboard with integrated biometric Touch ID for fast, secure authentication on Mac.",
+      "attributes": {
+        "layout": "US English",
+        "type": "Keyboard"
+      },
+      "images": ["https://picsum.photos/seed/acc405/600/400"]
+    },
+    {
+      "id": "ACC406",
+      "name": "Keychron K2 Pro Mechanical Keyboard",
+      "brand": "Keychron",
+      "category": "accessories",
+      "price": 99.0,
+      "rating": 4.7,
+      "inventory": 28,
+      "description": "Wireless QMK/VIA custom mechanical keyboard with hot-swappable tactile switches, RGB backlighting, and Mac/Windows layout keys.",
+      "attributes": {
+        "layout": "75% Compact",
+        "switches": "Hot-swappable Tactile",
+        "type": "Keyboard"
+      },
+      "images": ["https://picsum.photos/seed/acc406/600/400"]
+    },
+    {
+      "id": "ACC407",
+      "name": "Dell UltraSharp 27 4K Monitor",
+      "brand": "Dell",
+      "category": "accessories",
+      "price": 529.0,
+      "rating": 4.8,
+      "inventory": 11,
+      "description": "27-inch 4K UHD IPS Black monitor with 98% DCI-P3 wide color gamut and USB-C single cable 90W laptop charging hub.",
+      "attributes": {
+        "resolution": "4K UHD 3840x2160",
+        "size": "27 inch",
+        "type": "Monitor"
+      },
+      "images": ["https://picsum.photos/seed/acc407/600/400"]
+    },
+    {
+      "id": "ACC408",
+      "name": "Apple AirPods Pro 2",
+      "brand": "Apple",
+      "category": "accessories",
+      "price": 249.0,
+      "rating": 4.8,
+      "inventory": 30,
+      "description": "Wireless earbuds featuring H2 chip, 2x more Active Noise Cancellation, Adaptive Audio, Conversation Awareness, and USB-C MagSafe case.",
+      "attributes": {
+        "battery": "6 hours (30 with case)",
+        "noise_cancelling": "Yes",
+        "type": "Earbuds"
+      },
+      "images": ["https://picsum.photos/seed/acc408/600/400"]
+    },
+    {
+      "id": "ACC409",
+      "name": "Anker Prime 6-in-1 Charging Station",
+      "brand": "Anker",
+      "category": "accessories",
+      "price": 79.0,
+      "rating": 4.5,
+      "inventory": 45,
+      "description": "140W ultra-slim GaN desktop charging station with 2 AC outlets, 2 USB-C ports, and 2 USB-A ports to power all desktop gear.",
+      "attributes": {
+        "power": "140W GaN",
+        "ports": "6 Ports",
+        "type": "Charging Station"
+      },
+      "images": ["https://picsum.photos/seed/acc409/600/400"]
+    },
+    {
+      "id": "ACC410",
+      "name": "SanDisk Extreme 2TB Portable SSD",
+      "brand": "SanDisk",
+      "category": "accessories",
+      "price": 169.0,
+      "rating": 4.6,
+      "inventory": 24,
+      "description": "Rugged outdoor-rated USB 3.2 Gen 2 portable NVMe SSD with 1050 MB/s read speeds and IP65 dust and water resistance.",
+      "attributes": {
+        "capacity": "2TB",
+        "interface": "USB 3.2 Type-C",
+        "type": "SSD"
+      },
+      "images": ["https://picsum.photos/seed/acc410/600/400"]
+    },
+    {
+      "id": "ACC411",
+      "name": "Belkin BoostCharge Pro 3-in-1",
+      "brand": "Belkin",
+      "category": "accessories",
+      "price": 139.0,
+      "rating": 4.4,
+      "inventory": 15,
+      "description": "Premium magnetic wireless charging stand with 15W official MagSafe fast charging for iPhone, Apple Watch, and AirPods.",
+      "attributes": {
+        "output": "15W MagSafe",
+        "type": "Wireless Charger"
+      },
+      "images": ["https://picsum.photos/seed/acc411/600/400"]
+    },
+    {
+      "id": "ACC412",
+      "name": "Bose QuietComfort Ultra Earbuds",
+      "brand": "Bose",
+      "category": "accessories",
+      "price": 279.0,
+      "rating": 4.5,
+      "inventory": 12,
+      "description": "Spatial audio noise cancelling wireless earbuds with CustomTune ear canal sound personalization and immersive audio modes.",
+      "attributes": {
+        "battery": "6 hours",
+        "noise_cancelling": "Yes",
+        "type": "Earbuds"
+      },
+      "images": ["https://picsum.photos/seed/acc412/600/400"]
+    },
+    {
+      "id": "ACC413",
+      "name": "CalDigit TS4 Thunderbolt 4 Dock",
+      "brand": "CalDigit",
+      "category": "accessories",
+      "price": 399.0,
+      "rating": 4.9,
+      "inventory": 6,
+      "description": "Flagship 18-port Thunderbolt 4 workstation dock delivering 98W laptop power delivery, 2.5GbE Ethernet, and dual 6K display support.",
+      "attributes": {
+        "ports": "18 Ports",
+        "power_delivery": "98W",
+        "type": "Docking Station"
+      },
+      "images": ["https://picsum.photos/seed/acc413/600/400"]
+    }
+  ],
+  "users": [
+    {
+      "email": "customer@example.com",
+      "fullName": "Ananya Rao",
+      "membership": "BASIC",
+      "password": "Password123",
+      "role": "CUSTOMER"
+    },
+    {
+      "email": "prime@example.com",
+      "fullName": "Rahul Sharma",
+      "membership": "PRIME",
+      "password": "Password123",
+      "role": "CUSTOMER"
+    },
+    {
+      "email": "premium@example.com",
+      "fullName": "Vikram Mehta",
+      "membership": "PREMIUM",
+      "password": "Password123",
+      "role": "CUSTOMER"
+    },
+    {
+      "email": "support@example.com",
+      "fullName": "Support Agent",
+      "membership": "PRIME",
+      "password": "Password123",
+      "role": "SUPPORT_AGENT"
+    },
+    {
+      "email": "ops@example.com",
+      "fullName": "Ops Manager",
+      "membership": "PRIME",
+      "password": "Password123",
+      "role": "OPS_MANAGER"
+    },
+    {
+      "email": "catalog@example.com",
+      "fullName": "Catalog Manager",
+      "membership": "PRIME",
+      "password": "Password123",
+      "role": "CATALOG_MANAGER"
+    },
+    {
+      "email": "knowledge@example.com",
+      "fullName": "Knowledge Admin",
+      "membership": "PRIME",
+      "password": "Password123",
+      "role": "KNOWLEDGE_ADMIN"
+    },
+    {
+      "email": "admin@example.com",
+      "fullName": "Admin",
+      "membership": "PREMIUM",
+      "password": "Password123",
+      "role": "ADMIN"
+    },
+    {
+      "email": "sneha@example.com",
+      "fullName": "Sneha Patel",
+      "membership": "BASIC",
+      "password": "Password123",
+      "role": "CUSTOMER"
+    },
+    {
+      "email": "meera@example.com",
+      "fullName": "Meera Joshi",
+      "membership": "BASIC",
+      "password": "Password123",
+      "role": "CUSTOMER"
+    }
+  ]
+}
