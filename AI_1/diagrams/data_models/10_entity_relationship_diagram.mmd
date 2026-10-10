@@ -1,0 +1,96 @@
+erDiagram
+    users ||--o| customer_preferences : "has preferences"
+    users ||--o{ wishlists : "owns"
+    users ||--o{ carts : "owns"
+    users ||--o{ orders : "places"
+    users ||--o{ support_tickets : "creates"
+    users ||--o{ assistant_conversations : "participates"
+
+    categories ||--o{ categories : "parent_id"
+    categories ||--o{ products : "contains"
+    products ||--o{ product_attributes : "has"
+    products ||--o{ product_images : "has"
+    products ||--|| inventory_levels : "tracked by"
+
+    wishlists ||--o{ wishlist_items : "contains"
+    wishlist_items }o--|| products : "references"
+
+    carts ||--o{ cart_items : "contains"
+    cart_items }o--|| products : "references"
+
+    orders ||--o{ order_items : "contains"
+    order_items }o--|| products : "snapshot of"
+    orders ||--o| shipments : "fulfilled by"
+    shipments ||--o{ shipment_events : "tracks"
+    orders ||--o{ refunds : "has"
+
+    knowledge_documents ||--o{ knowledge_chunks : "chunked into"
+
+    assistant_conversations ||--o{ assistant_messages : "contains"
+    assistant_conversations ||--o{ agent_runs : "triggers"
+    agent_runs ||--o{ agent_tool_calls : "executes"
+
+    users {
+        uuid id PK
+        string email UK
+        string password_hash
+        string role
+        string membership_tier
+        string status
+    }
+
+    products {
+        uuid id PK
+        string name
+        string slug UK
+        uuid category_id FK
+        numeric price
+        numeric rating
+        boolean is_active
+    }
+
+    inventory_levels {
+        uuid product_id PK,FK
+        int available_quantity
+        int reserved_quantity
+        int version
+    }
+
+    orders {
+        uuid id PK
+        string order_number UK
+        uuid user_id FK
+        string status
+        numeric total
+        string idempotency_key UK
+        timestamp created_at
+    }
+
+    order_items {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        string product_name_snapshot
+        numeric unit_price_snapshot
+        int quantity
+        jsonb attributes_snapshot
+    }
+
+    knowledge_chunks {
+        uuid id PK
+        uuid document_id FK
+        int chunk_index
+        string heading
+        text content
+        vector embedding
+        jsonb metadata
+    }
+
+    agent_tool_calls {
+        uuid id PK
+        uuid agent_run_id FK
+        string tool_name
+        jsonb input_json
+        jsonb output_json
+        string status
+    }

@@ -1,0 +1,63 @@
+stateDiagram-v2
+    classDef happy fill:#ECFDF5,stroke:#10B981,stroke-width:2px;
+    classDef cancel fill:#FFE4E6,stroke:#E11D48,stroke-width:2px;
+    classDef normal fill:#EEF2FF,stroke:#6366F1,stroke-width:2px;
+    classDef ex fill:#FEF3C7,stroke:#D97706,stroke-width:2px;
+
+    %% 1. Cart Lifecycle
+    state "Cart: ACTIVE" as Cart_Active
+    state "Cart: CHECKED_OUT" as Cart_Done
+    state "Cart: ABANDONED" as Cart_Aband
+
+    [*] --> Cart_Active
+    Cart_Active --> Cart_Done : Simulated checkout success
+    Cart_Active --> Cart_Aband : Session expiry / timeout
+
+    %% 2. Order Lifecycle
+    state "Order: CREATED" as Ord_Created
+    state "Order: CONFIRMED" as Ord_Confirmed
+    state "Order: PROCESSING" as Ord_Proc
+    state "Order: SHIPPED" as Ord_Shipped
+    state "Order: OUT_FOR_DELIVERY" as Ord_Out
+    state "Order: DELIVERED" as Ord_Delivered
+    state "Order: CANCELLED" as Ord_Cancelled
+
+    [*] --> Ord_Created
+    Ord_Created --> Ord_Confirmed : Payment simulated (PAID_SIMULATED)
+    Ord_Confirmed --> Ord_Proc : Warehouse fulfillment starts
+    Ord_Proc --> Ord_Shipped : Shipment registered
+    Ord_Shipped --> Ord_Out : Carrier transfer
+    Ord_Out --> Ord_Delivered : Handoff complete
+
+    Ord_Created --> Ord_Cancelled : User / Agent cancels
+    Ord_Confirmed --> Ord_Cancelled : User / Agent cancels
+    Ord_Proc --> Ord_Cancelled : Cancelled before dispatch
+    Ord_Delivered --> [*]
+    Ord_Cancelled --> [*]
+
+    %% 3. Shipment Lifecycle
+    state "Shipment: PENDING" as Ship_Pend
+    state "Shipment: LABEL_CREATED" as Ship_Label
+    state "Shipment: IN_TRANSIT" as Ship_Transit
+    state "Shipment: DELAYED" as Ship_Delayed
+    state "Shipment: OUT_FOR_DELIVERY" as Ship_Out
+    state "Shipment: DELIVERED" as Ship_Done
+
+    [*] --> Ship_Pend
+    Ship_Pend --> Ship_Label : Tracking number allocated
+    Ship_Label --> Ship_Transit : Carrier scan
+    Ship_Transit --> Ship_Delayed : Exception event
+    Ship_Delayed --> Ship_Transit : Transit resumed
+    Ship_Transit --> Ship_Out : Local dispatch
+    Ship_Out --> Ship_Done : Completed
+
+    %% 4. Knowledge Doc Lifecycle
+    state "Doc: DRAFT" as Doc_Draft
+    state "Doc: ACTIVE" as Doc_Active
+    state "Doc: SUPERSEDED" as Doc_Super
+    state "Doc: ARCHIVED" as Doc_Arch
+
+    [*] --> Doc_Draft
+    Doc_Draft --> Doc_Active : Admin activation & PgVector indexing
+    Doc_Active --> Doc_Super : Newer version activated
+    Doc_Super --> Doc_Arch : Historical policy archived

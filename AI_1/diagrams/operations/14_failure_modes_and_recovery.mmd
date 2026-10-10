@@ -1,0 +1,30 @@
+flowchart TD
+    subgraph CommerceFailures["1. Commerce & Stock Failures"]
+        F1["Duplicate Checkout Click"] -->|Idempotency Key Conflict| R1["Replay Cached Order Response<br/>Zero duplicate charge"]
+        F2["Concurrent Stock Oversell"] -->|SELECT FOR UPDATE Shortage| R2["Transaction Rollback<br/>Return 409 Conflict + Alternatives"]
+    end
+
+    subgraph AIFailures["2. AI Model & Schema Failures"]
+        F3["Model Timeout (> 10s)"] -->|TimeoutException| R3["Circuit Breaker Fallback<br/>Keyword search + Category Facets"]
+        F4["Malformed Model JSON"] -->|Validation Failure| R4["Auto-Retry Once<br/>Deterministic Fallback if fails"]
+    end
+
+    subgraph RAGFailures["3. Knowledge & Evidence Failures"]
+        F5["Missing Policy Evidence"] -->|Similarity < 0.72| R5["Safe Fallback (confidence: NONE)<br/>Zero hallucination allowed"]
+        F6["Contradictory Policies"] -->|Date Comparison| R6["Select Latest effectiveDate<br/>Flag confidence: LOW + Flag Review"]
+    end
+
+    subgraph AgentFailures["4. Agent & Security Failures"]
+        F7["Cancel Shipped Order"] -->|State Check: SHIPPED| R7["Block Cancellation<br/>Explain shipping status & return SLA"]
+        F8["Unauthorized Mutation"] -->|RBAC Filter Fails| R8["Block Action<br/>403 Forbidden + Audit Log Alert"]
+    end
+
+    classDef c1 fill:#FEF3C7,stroke:#D97706,stroke-width:2px;
+    classDef c2 fill:#EEF2FF,stroke:#6366F1,stroke-width:2px;
+    classDef c3 fill:#F5F3FF,stroke:#8B5CF6,stroke-width:2px;
+    classDef c4 fill:#FFE4E6,stroke:#E11D48,stroke-width:2px;
+
+    class F1,R1,F2,R2 c1;
+    class F3,R3,F4,R4 c2;
+    class F5,R5,F6,R6 c3;
+    class F7,R7,F8,R8 c4;

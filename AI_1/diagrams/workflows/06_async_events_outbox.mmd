@@ -1,0 +1,40 @@
+flowchart TB
+    subgraph TxBoundary["Atomic Transaction Boundary (PostgreSQL Commit)"]
+        DomainSvc["Domain Producer<br/>OrderService.checkout()"]
+        Table_Order[("orders Table<br/>Status: CREATED")]
+        Table_Outbox[("outbox_events Table<br/>Status: PENDING<br/>Type: order.created")]
+        
+        DomainSvc -->|Save Entity| Table_Order
+        DomainSvc -->|Save Event| Table_Outbox
+    end
+
+    subgraph Relay["Outbox Event Relay (Spring @Scheduled / CDC)"]
+        Poller["Outbox Event Poller<br/>SELECT WHERE status = PENDING"]
+        EventBus{{"Event Publisher<br/>Spring Events (MVP) / Kafka (Future)"}}
+        
+        Table_Outbox -->|Poll PENDING| Poller
+        Poller -->|Publish Event| EventBus
+        Poller -.->|UPDATE status = SENT| Table_Outbox
+    end
+
+    subgraph Consumers["Decoupled Domain Consumers (@Async / Listeners)"]
+        C_Ship["Shipment Simulator<br/>order.created -> Create Tracking & LABEL_CREATED"]
+        C_Inv["Inventory Reconciliation<br/>order.cancelled -> Release Reserved Stock"]
+        C_RAG["Knowledge Re-Indexer<br/>knowledge.document_published -> Invalidate Vector Cache"]
+        C_Audit["Audit & Ops Stream<br/>agent.action_completed -> Append Immutable Audit Log"]
+    end
+
+    EventBus -->|order.created| C_Ship
+    EventBus -->|order.cancelled| C_Inv
+    EventBus -->|doc.published| C_RAG
+    EventBus -->|action.completed| C_Audit
+
+    classDef tx fill:#EEF2FF,stroke:#6366F1,stroke-width:2px;
+    classDef relay fill:#F5F3FF,stroke:#8B5CF6,stroke-width:2px;
+    classDef bus fill:#FEF3C7,stroke:#D97706,stroke-width:2px;
+    classDef consumer fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px;
+
+    class DomainSvc,Table_Order,Table_Outbox tx;
+    class Poller relay;
+    class EventBus bus;
+    class C_Ship,C_Inv,C_RAG,C_Audit consumer;

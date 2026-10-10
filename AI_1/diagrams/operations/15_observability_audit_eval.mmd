@@ -1,0 +1,40 @@
+flowchart TB
+    subgraph Tracing["1. Distributed Tracing & Metrics (Micrometer / Actuator)"]
+        TraceId["X-Trace-Id Header<br/>Generated at Gateway"]
+        MDC["MDC Logging Context<br/>Propagated to AI & Tools"]
+        Metrics["Performance SLAs<br/>Search < 500ms | AI < 5s | RAG < 7s"]
+        
+        TraceId --> MDC --> Metrics
+    end
+
+    subgraph AITrace["2. AI Interaction Trace Record"]
+        TraceRecord["assistant_messages.metadata<br/>userQuery, sanitizedQuery, retrievedChunks, rawOutput, validatedOutput, latencyMs"]
+    end
+
+    subgraph AuditTrail["3. Immutable Audit Logging & State Diff"]
+        Table_Audit[("audit_logs Table<br/>actor, action, before_json, after_json, trace_id")]
+        Table_AgentRuns[("agent_runs & agent_tool_calls<br/>runId, tool_name, inputs, outputs, status")]
+    end
+
+    subgraph Testing["4. Testing Pyramid & Golden Datasets"]
+        UnitTests["Unit Tests (JUnit 5)<br/>Validators, State Machines, Ranking"]
+        IntegrationTests["Integration Tests<br/>Testcontainers PostgreSQL + PgVector"]
+        GoldenDataset["RAG Golden Dataset<br/>20 Policy Q&A, 5 Manuals, 5 No-Answer, 3 Conflicts"]
+        LiveDemos["Live Evaluation Demos<br/>Demo 1-5 End-to-End Scenarios"]
+
+        UnitTests --> IntegrationTests --> GoldenDataset --> LiveDemos
+    end
+
+    MDC --> TraceRecord
+    TraceRecord --> Table_Audit
+    MDC --> Table_AgentRuns
+
+    classDef trace fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px;
+    classDef ai fill:#ECFDF5,stroke:#10B981,stroke-width:2px;
+    classDef audit fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px;
+    classDef test fill:#F5F3FF,stroke:#8B5CF6,stroke-width:2px;
+
+    class TraceId,MDC,Metrics trace;
+    class TraceRecord ai;
+    class Table_Audit,Table_AgentRuns audit;
+    class UnitTests,IntegrationTests,GoldenDataset,LiveDemos test;

@@ -1,0 +1,53 @@
+sequenceDiagram
+    autonumber
+    actor Client as Customer (React 19)
+    participant Gateway as API Gateway / Auth
+    participant OrderSvc as Order Service
+    participant CartSvc as Cart Service
+    participant InvSvc as Inventory Service
+    participant DB as PostgreSQL 15 (DB & Outbox)
+
+    Client->>Gateway: POST /api/v1/orders<br/>[Bearer JWT, Idempotency-Key: UUID]
+    Gateway->>OrderSvc: Validate JWT & Route Request
+    
+    rect rgb(240, 244, 255)
+        Note over OrderSvc,DB: Step 1: Idempotency Verification
+        OrderSvc->>DB: SELECT * FROM idempotency_keys WHERE key = UUID
+        alt Key Exists (Duplicate Request)
+            DB-->>OrderSvc: Return Cached Order Response
+            OrderSvc-->>Client: 200 OK (Replay Original Order ord_555)
+        else Key Not Found (First Execution)
+            DB-->>OrderSvc: Null / Miss
+        end
+    end
+
+    rect rgb(255, 245, 245)
+        Note over OrderSvc,CartSvc: Step 2: Price & Cart Validation
+        OrderSvc->>CartSvc: Revalidate Cart Items & Prices
+        CartSvc->>DB: SELECT * FROM products WHERE id IN (items)
+        CartSvc-->>OrderSvc: Server Recalculated Total ($1049.00)
+    end
+
+    rect rgb(254, 250, 235)
+        Note over OrderSvc,DB: Step 3: Atomic Stock Lock & Reservation
+        OrderSvc->>InvSvc: Reserve Stock @Transactional
+        InvSvc->>DB: SELECT available_qty FROM inventory_levels FOR UPDATE
+        alt Insufficient Stock (available_qty < qty)
+            InvSvc-->>OrderSvc: StockConflictException
+            OrderSvc-->>Client: 409 Conflict: "Product LAP101 out of stock"
+        else Stock Available
+            InvSvc->>DB: UPDATE inventory_levels SET available_qty = available_qty - qty
+        end
+    end
+
+    rect rgb(240, 253, 244)
+        Note over OrderSvc,DB: Step 4: Order Creation & Outbox Event
+        OrderSvc->>DB: INSERT INTO orders (id, order_number, total, status='CREATED')
+        OrderSvc->>DB: INSERT INTO order_items (snapshots: name, price, attributes)
+        OrderSvc->>DB: UPDATE carts SET status = 'CHECKED_OUT'
+        OrderSvc->>DB: INSERT INTO outbox_events (type='order.created', payload=...)
+        OrderSvc->>DB: INSERT INTO idempotency_keys (key, response_json)
+        OrderSvc->>DB: COMMIT TRANSACTION
+    end
+
+    OrderSvc-->>Client: 201 Created: { orderId: 'ord_555', orderNumber: 'ORD-555', status: 'CREATED', paymentStatus: 'PAID_SIMULATED' }
