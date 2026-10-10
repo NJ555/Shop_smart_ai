@@ -330,12 +330,12 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    DEV[Dev Machine] --> DC[Docker Compose<br/>postgres:15 + pgvector]
-    DEV --> BE_RUN[Backend<br/>./mvnw spring-boot:run :8080]
-    DEV --> FE_RUN[Frontend<br/>npm run dev :5173]
+    DEV["Dev Machine"] --> DC["Docker Compose<br/>postgres:15 + pgvector"]
+    DEV --> BE_RUN["Backend<br/>./mvnw spring-boot:run :8080"]
+    DEV --> FE_RUN["Frontend<br/>npm run dev :5173"]
     BE_RUN --> DC
-    FE_RUN -- VITE_API_BASE_URL<br/>http://localhost:8080/api/v1 --> BE_RUN
-    ENV[env: SPRING_DATASOURCE_URL<br/>AI_PROVIDER=mock|openai|ollama<br/>EMBEDDING_PROVIDER<br/>JWT_SECRET] -.-> BE_RUN
+    FE_RUN -->|"VITE_API_BASE_URL<br/>http://localhost:8080/api/v1"| BE_RUN
+    ENV["env: SPRING_DATASOURCE_URL<br/>AI_PROVIDER=mock &#124; openai &#124; ollama<br/>EMBEDDING_PROVIDER<br/>JWT_SECRET"] -.-> BE_RUN
 ```
 
 Seed: 3 categories, 20+ products (5 laptops/5 phones/5 appliances/5 accessories), 3 users + support/admin, 3+ policy docs, 2 orders, 1 shipment. `AI_PROVIDER=mock` → deterministic vectors/extraction for demo.
